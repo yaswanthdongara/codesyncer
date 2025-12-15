@@ -1,0 +1,2 @@
+Please place your app icon here and name it "icon.png".
+Then run: flutter pub run flutter_launcher_icons
