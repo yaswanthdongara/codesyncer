@@ -1786,14 +1786,38 @@ function appendMessageToUI(role, content) {
     
     const sender = role === 'user' ? 'You' : 'AI';
     
-    // Format content (simple markdown support)
-    let formattedContent = content
+    // 1. Escape HTML (basic)
+    let safeContent = content
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/```(\w*)([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+        .replace(/>/g, "&gt;");
+
+    // 2. Extract code blocks to prevent <br> replacement inside them
+    const codeBlocks = [];
+    safeContent = safeContent.replace(/```(\w*)([\s\S]*?)```/g, (match, lang, code) => {
+        codeBlocks.push({ lang, code });
+        return `___CODE_BLOCK_${codeBlocks.length - 1}___`;
+    });
+
+    // 3. Format the remaining text (newlines to <br>, inline code)
+    let formattedContent = safeContent
         .replace(/`([^`]+)`/g, '<code>$1</code>')
         .replace(/\n/g, '<br>');
+
+    // 4. Restore code blocks with proper HTML structure
+    formattedContent = formattedContent.replace(/___CODE_BLOCK_(\d+)___/g, (match, index) => {
+        const block = codeBlocks[index];
+        const language = block.lang || 'text';
+        return `
+            <div class="code-block-wrapper">
+                <div class="code-block-header">
+                    <span class="code-lang">${language}</span>
+                    <button class="copy-code-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-${language}">${block.code}</code></pre>
+            </div>
+        `;
+    });
 
     msgDiv.innerHTML = `
         <div class="chat-sender">${sender}</div>
@@ -1801,6 +1825,32 @@ function appendMessageToUI(role, content) {
     `;
     
     chatHistory.appendChild(msgDiv);
+}
+
+function copyCode(btn) {
+    const wrapper = btn.closest('.code-block-wrapper');
+    const codeBlock = wrapper.querySelector('code');
+    
+    // Create a temporary textarea to copy the text
+    // We use this method to ensure we get the raw text without HTML entities
+    const textarea = document.createElement('textarea');
+    textarea.value = codeBlock.textContent;
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        document.execCommand('copy');
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => {
+            btn.textContent = originalText;
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy:', err);
+        btn.textContent = 'Error';
+    }
+    
+    document.body.removeChild(textarea);
 }
 
 function scrollToBottom() {
