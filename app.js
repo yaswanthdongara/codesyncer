@@ -77,6 +77,17 @@ const filePasswordInput = document.getElementById('filePassword');
 const changeFolderPassBtn = document.getElementById('changeFolderPassBtn');
 const folderPassInput = document.getElementById('folderPassInput');
 
+// Wallpaper Elements
+const wallpaperUrlInput = document.getElementById('wallpaperUrlInput');
+const wallpaperFileInput = document.getElementById('wallpaperFileInput');
+const wallpaperEffectSelect = document.getElementById('wallpaperEffectSelect');
+const wallpaperBlurRange = document.getElementById('wallpaperBlurRange');
+const wallpaperBlurValue = document.getElementById('wallpaperBlurValue');
+const wallpaperTransparentCheckbox = document.getElementById('wallpaperTransparentCheckbox');
+const wallpaperOpacityRange = document.getElementById('wallpaperOpacityRange');
+const wallpaperOpacityValue = document.getElementById('wallpaperOpacityValue');
+const wallpaperOpacityGroup = document.getElementById('wallpaperOpacityGroup');
+
 // State for editing
 let editingFile = null; // { path: string, sha: string }
 let currentViewFile = null; // { name: string, content: string }
@@ -97,6 +108,7 @@ function setFolderPassword(pass) {
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     console.log('App Initialized');
+    initWallpaper();
     setupEventListeners();
     loadTheme();
     updateViewToggleButtons(); // Set initial state of buttons
@@ -202,6 +214,12 @@ function setupEventListeners() {
     if (chatExportPdfBtn) chatExportPdfBtn.addEventListener('click', exportChatToPDF);
     if (chatExportTxtBtn) chatExportTxtBtn.addEventListener('click', exportChatToText);
     if (chatInput) {
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -218,6 +236,23 @@ function setupEventListeners() {
     if (createFolderBtn) createFolderBtn.addEventListener('click', createNewFolder);
     if (moveSelectedBtn) moveSelectedBtn.addEventListener('click', moveSelectedFiles);
     if (changeFolderPassBtn) changeFolderPassBtn.addEventListener('click', changeFolderPassword);
+
+    // Wallpaper Listeners
+    if (wallpaperUrlInput) wallpaperUrlInput.addEventListener('input', saveWallpaperSettings);
+    if (wallpaperEffectSelect) {
+        wallpaperEffectSelect.addEventListener('change', () => {
+            saveWallpaperSettings();
+            if (wallpaperBlurRange && wallpaperBlurRange.parentElement) {
+                wallpaperBlurRange.parentElement.style.display = wallpaperEffectSelect.value === 'blur' ? 'flex' : 'none';
+            }
+        });
+    }
+    if (wallpaperBlurRange) {
+        wallpaperBlurRange.addEventListener('input', () => {
+            if (wallpaperBlurValue) wallpaperBlurValue.textContent = wallpaperBlurRange.value + 'px';
+            saveWallpaperSettings();
+        });
+    }
 
     // View Switcher Listeners
     const listViewBtn = document.getElementById('listViewBtn');
@@ -569,6 +604,10 @@ async function createRepository() {
 function changeTheme() {
     document.documentElement.className = themeSelect.value;
     localStorage.setItem('theme', themeSelect.value);
+    // Re-apply wallpaper transparency if active, as theme change resets variables
+    if (typeof loadAndApplyWallpaper === 'function') {
+        loadAndApplyWallpaper();
+    }
 }
 
 function loadTheme() {
@@ -1775,6 +1814,7 @@ async function sendChatMessage() {
     // Add user message
     appendMessageToUI('user', text);
     chatInput.value = '';
+    chatInput.style.height = 'auto'; // Reset height
     scrollToBottom();
     
     // Save to history
@@ -2143,3 +2183,180 @@ async function renameItem(name, type) {
     }
 }
 
+// ===================================
+// WALLPAPER LOGIC
+// ===================================
+
+function initWallpaper() {
+    // Create wallpaper element if it doesn't exist
+    let wallpaperDiv = document.getElementById('wallpaper-background');
+    if (!wallpaperDiv) {
+        wallpaperDiv = document.createElement('div');
+        wallpaperDiv.id = 'wallpaper-background';
+        document.body.prepend(wallpaperDiv);
+    }
+
+    // Listeners
+    if (wallpaperUrlInput) wallpaperUrlInput.addEventListener('input', saveWallpaperSettings);
+    if (wallpaperEffectSelect) wallpaperEffectSelect.addEventListener('change', () => {
+        toggleBlurControl();
+        saveWallpaperSettings();
+    });
+    if (wallpaperBlurRange) wallpaperBlurRange.addEventListener('input', () => {
+        if (wallpaperBlurValue) wallpaperBlurValue.textContent = wallpaperBlurRange.value + 'px';
+        saveWallpaperSettings();
+    });
+    
+    // New Listeners
+    if (wallpaperFileInput) wallpaperFileInput.addEventListener('change', handleWallpaperUpload);
+    if (wallpaperTransparentCheckbox) wallpaperTransparentCheckbox.addEventListener('change', () => {
+        toggleOpacityControl();
+        saveWallpaperSettings();
+    });
+    if (wallpaperOpacityRange) wallpaperOpacityRange.addEventListener('input', () => {
+        if (wallpaperOpacityValue) wallpaperOpacityValue.textContent = (wallpaperOpacityRange.value / 100).toFixed(2);
+        saveWallpaperSettings();
+    });
+
+    loadAndApplyWallpaper();
+}
+
+function toggleBlurControl() {
+    if (wallpaperBlurRange && wallpaperBlurRange.parentElement) {
+        wallpaperBlurRange.parentElement.style.display = wallpaperEffectSelect.value === 'blur' ? 'flex' : 'none';
+    }
+}
+
+function toggleOpacityControl() {
+    if (wallpaperOpacityGroup) {
+        wallpaperOpacityGroup.style.display = wallpaperTransparentCheckbox.checked ? 'flex' : 'none';
+    }
+}
+
+function handleWallpaperUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Image is too large (max 5MB). Please choose a smaller image.');
+        wallpaperFileInput.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const base64 = event.target.result;
+        try {
+            localStorage.setItem('wallpaper_image_data', base64);
+            localStorage.setItem('wallpaper_url', ''); // Clear URL if file is uploaded
+            if (wallpaperUrlInput) wallpaperUrlInput.value = '';
+            loadAndApplyWallpaper();
+        } catch (err) {
+            alert('Failed to save image. It might be too large for local storage.');
+            console.error(err);
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function loadAndApplyWallpaper() {
+    const url = localStorage.getItem('wallpaper_url') || '';
+    const imageData = localStorage.getItem('wallpaper_image_data') || '';
+    const effect = localStorage.getItem('wallpaper_effect') || 'normal';
+    const blur = localStorage.getItem('wallpaper_blur') || '5';
+    const transparent = localStorage.getItem('wallpaper_transparent') === 'true';
+    const opacity = localStorage.getItem('wallpaper_opacity') || '80';
+
+    // Update UI
+    if (wallpaperUrlInput && wallpaperUrlInput.value !== url && !imageData) wallpaperUrlInput.value = url;
+    if (wallpaperEffectSelect) wallpaperEffectSelect.value = effect;
+    if (wallpaperBlurRange) wallpaperBlurRange.value = blur;
+    if (wallpaperBlurValue) wallpaperBlurValue.textContent = blur + 'px';
+    if (wallpaperTransparentCheckbox) wallpaperTransparentCheckbox.checked = transparent;
+    if (wallpaperOpacityRange) wallpaperOpacityRange.value = opacity;
+    if (wallpaperOpacityValue) wallpaperOpacityValue.textContent = (opacity / 100).toFixed(2);
+
+    toggleBlurControl();
+    toggleOpacityControl();
+
+    applyWallpaper(url, imageData, effect, blur, transparent, opacity);
+}
+
+function applyWallpaper(url, imageData, effect, blur, transparent, opacity) {
+    const wallpaperDiv = document.getElementById('wallpaper-background');
+    if (!wallpaperDiv) return;
+
+    const hasImage = url || imageData;
+
+    if (hasImage) {
+        wallpaperDiv.style.backgroundImage = `url('${imageData || url}')`;
+        wallpaperDiv.style.opacity = '1';
+        // Make body background transparent so wallpaper shows
+        document.body.style.backgroundColor = 'transparent';
+    } else {
+        wallpaperDiv.style.backgroundImage = 'none';
+        wallpaperDiv.style.opacity = '0';
+        document.body.style.backgroundColor = '';
+    }
+
+    if (effect === 'blur') {
+        wallpaperDiv.style.filter = `blur(${blur}px)`;
+    } else {
+        wallpaperDiv.style.filter = 'none';
+    }
+
+    // Container Transparency
+    if (transparent && hasImage) {
+        const opacityVal = parseInt(opacity) / 100;
+        
+        // Get original theme colors from HTML element (computed style)
+        const computedStyle = getComputedStyle(document.documentElement);
+        const cardBg = computedStyle.getPropertyValue('--card-bg').trim();
+        const inputBg = computedStyle.getPropertyValue('--input-bg').trim();
+        
+        // Helper to convert hex to rgba
+        const hexToRgba = (hex, alpha) => {
+            let r = 0, g = 0, b = 0;
+            if (!hex) return `rgba(22, 27, 34, ${alpha})`; // Default fallback
+
+            if (hex.startsWith('#')) {
+                if (hex.length === 4) {
+                    r = parseInt(hex[1] + hex[1], 16);
+                    g = parseInt(hex[2] + hex[2], 16);
+                    b = parseInt(hex[3] + hex[3], 16);
+                } else if (hex.length === 7) {
+                    r = parseInt(hex[1] + hex[2], 16);
+                    g = parseInt(hex[3] + hex[4], 16);
+                    b = parseInt(hex[5] + hex[6], 16);
+                }
+            } else if (hex.startsWith('rgb')) {
+                // Already rgb, just change alpha? Too complex to parse all formats, assume hex for themes
+                return hex; 
+            }
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        };
+
+        document.body.style.setProperty('--card-bg', hexToRgba(cardBg, opacityVal));
+        document.body.style.setProperty('--input-bg', hexToRgba(inputBg, opacityVal));
+    } else {
+        document.body.style.removeProperty('--card-bg');
+        document.body.style.removeProperty('--input-bg');
+    }
+}
+
+function saveWallpaperSettings() {
+    const newUrl = wallpaperUrlInput ? wallpaperUrlInput.value.trim() : '';
+    const oldUrl = localStorage.getItem('wallpaper_url');
+    
+    if (newUrl && newUrl !== oldUrl) {
+        localStorage.removeItem('wallpaper_image_data'); // Clear uploaded image if URL changes
+    }
+
+    if (wallpaperUrlInput) localStorage.setItem('wallpaper_url', newUrl);
+    if (wallpaperEffectSelect) localStorage.setItem('wallpaper_effect', wallpaperEffectSelect.value);
+    if (wallpaperBlurRange) localStorage.setItem('wallpaper_blur', wallpaperBlurRange.value);
+    if (wallpaperTransparentCheckbox) localStorage.setItem('wallpaper_transparent', wallpaperTransparentCheckbox.checked);
+    if (wallpaperOpacityRange) localStorage.setItem('wallpaper_opacity', wallpaperOpacityRange.value);
+    
+    loadAndApplyWallpaper();
+}

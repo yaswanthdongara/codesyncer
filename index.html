@@ -86,6 +86,39 @@
                     </div>
 
                     <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+                    <h3>Wallpaper Settings</h3>
+                    <div class="form-group">
+                        <label for="wallpaperUrlInput">Wallpaper URL</label>
+                        <input type="text" id="wallpaperUrlInput" class="text-input" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label for="wallpaperFileInput">Or Upload Image</label>
+                        <input type="file" id="wallpaperFileInput" class="text-input" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="wallpaperEffectSelect">Effect</label>
+                        <select id="wallpaperEffectSelect" class="text-input">
+                            <option value="normal">Normal</option>
+                            <option value="blur">Blur</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: none; align-items: center; gap: 10px;">
+                        <label for="wallpaperBlurRange" style="margin: 0;">Blur Level:</label>
+                        <input type="range" id="wallpaperBlurRange" min="0" max="20" value="5" style="flex: 1;">
+                        <span id="wallpaperBlurValue">5px</span>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                        <input type="checkbox" id="wallpaperTransparentCheckbox">
+                        <label for="wallpaperTransparentCheckbox" style="margin: 0;">Transparent Containers</label>
+                    </div>
+                    <div class="form-group" id="wallpaperOpacityGroup" style="display: none; align-items: center; gap: 10px;">
+                        <label for="wallpaperOpacityRange" style="margin: 0;">Opacity:</label>
+                        <input type="range" id="wallpaperOpacityRange" min="0" max="100" value="80" style="flex: 1;">
+                        <span id="wallpaperOpacityValue">0.8</span>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
                     
                     <h3>Folder Security</h3>
                     <div class="form-group">
