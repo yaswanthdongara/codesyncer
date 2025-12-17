@@ -9,8 +9,43 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         (function() {
+            // Theme Loader
             const savedTheme = localStorage.getItem('theme') || 'theme-black';
             document.documentElement.className = savedTheme;
+
+            // Wallpaper Loader (Prevents Flash)
+            const url = localStorage.getItem('wallpaper_url') || '';
+            const imageData = localStorage.getItem('wallpaper_image_data') || '';
+            const effect = localStorage.getItem('wallpaper_effect') || 'normal';
+            const blur = localStorage.getItem('wallpaper_blur') || '5';
+            const transparent = localStorage.getItem('wallpaper_transparent') === 'true';
+            const opacity = localStorage.getItem('wallpaper_opacity') || '80';
+
+            document.addEventListener('DOMContentLoaded', () => {
+                let wallpaperDiv = document.getElementById('wallpaper-background');
+                if (!wallpaperDiv) {
+                    wallpaperDiv = document.createElement('div');
+                    wallpaperDiv.id = 'wallpaper-background';
+                    document.body.prepend(wallpaperDiv);
+                }
+
+                const hasImage = url || imageData;
+                if (hasImage) {
+                    wallpaperDiv.style.backgroundImage = `url('${imageData || url}')`;
+                    wallpaperDiv.style.opacity = '1';
+                    document.body.style.backgroundColor = 'transparent';
+                } else {
+                    wallpaperDiv.style.backgroundImage = 'none';
+                    wallpaperDiv.style.opacity = '0';
+                    document.body.style.backgroundColor = '';
+                }
+
+                if (effect === 'blur') {
+                    wallpaperDiv.style.filter = `blur(${blur}px)`;
+                } else {
+                    wallpaperDiv.style.filter = 'none';
+                }
+            });
         })();
     </script>
 </head>
@@ -115,6 +150,14 @@
                         <span id="wallpaperOpacityValue">0.8</span>
                     </div>
 
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+                    
+                    <h3>Chat Options</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button id="chatExportPdfBtn" class="btn btn-secondary" style="flex: 1;">Export Chat as PDF</button>
+                        <button id="chatClearBtn" class="btn btn-danger" style="flex: 1;">Clear Chat History</button>
+                    </div>
+
                     <button id="saveTokenBtn" class="btn">Save Configuration</button>
                 </div>
             </div>
@@ -133,11 +176,6 @@
                 <textarea id="chatInput" class="text-input" placeholder="Type your message..." rows="1" style="flex-grow: 1; min-height: 50px; max-height: 200px; resize: none; border: none; background: transparent; padding: 10px; overflow-y: hidden;"></textarea>
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <button id="chatSendBtn" class="btn" style="height: 40px;">Send</button>
-                    <div style="display: flex; gap: 5px;">
-                        <button id="chatExportPdfBtn" class="btn btn-secondary btn-small" title="Export as PDF" style="flex: 1;">PDF</button>
-                        <button id="chatExportTxtBtn" class="btn btn-secondary btn-small" title="Export as Text" style="flex: 1;">TXT</button>
-                    </div>
-                    <button id="chatClearBtn" class="btn btn-secondary btn-small" title="Clear Chat History">Clear</button>
                 </div>
             </div>
         </div>

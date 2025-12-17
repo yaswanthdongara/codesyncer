@@ -212,7 +212,7 @@ function setupEventListeners() {
     if (chatSendBtn) chatSendBtn.addEventListener('click', sendChatMessage);
     if (chatClearBtn) chatClearBtn.addEventListener('click', clearChatHistory);
     if (chatExportPdfBtn) chatExportPdfBtn.addEventListener('click', exportChatToPDF);
-    if (chatExportTxtBtn) chatExportTxtBtn.addEventListener('click', exportChatToText);
+    // if (chatExportTxtBtn) chatExportTxtBtn.addEventListener('click', exportChatToText); // Removed
     if (chatInput) {
         // Auto-resize textarea
         chatInput.addEventListener('input', function() {
@@ -2188,7 +2188,7 @@ async function renameItem(name, type) {
 // ===================================
 
 function initWallpaper() {
-    // Create wallpaper element if it doesn't exist
+    // Wallpaper div is now created in head script to prevent flash
     let wallpaperDiv = document.getElementById('wallpaper-background');
     if (!wallpaperDiv) {
         wallpaperDiv = document.createElement('div');

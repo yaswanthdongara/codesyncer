@@ -8,8 +8,43 @@
     <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
     <script>
         (function() {
+            // Theme Loader
             const savedTheme = localStorage.getItem('theme') || 'theme-black';
             document.documentElement.className = savedTheme;
+
+            // Wallpaper Loader (Prevents Flash)
+            const url = localStorage.getItem('wallpaper_url') || '';
+            const imageData = localStorage.getItem('wallpaper_image_data') || '';
+            const effect = localStorage.getItem('wallpaper_effect') || 'normal';
+            const blur = localStorage.getItem('wallpaper_blur') || '5';
+            const transparent = localStorage.getItem('wallpaper_transparent') === 'true';
+            const opacity = localStorage.getItem('wallpaper_opacity') || '80';
+
+            document.addEventListener('DOMContentLoaded', () => {
+                let wallpaperDiv = document.getElementById('wallpaper-background');
+                if (!wallpaperDiv) {
+                    wallpaperDiv = document.createElement('div');
+                    wallpaperDiv.id = 'wallpaper-background';
+                    document.body.prepend(wallpaperDiv);
+                }
+
+                const hasImage = url || imageData;
+                if (hasImage) {
+                    wallpaperDiv.style.backgroundImage = `url('${imageData || url}')`;
+                    wallpaperDiv.style.opacity = '1';
+                    document.body.style.backgroundColor = 'transparent';
+                } else {
+                    wallpaperDiv.style.backgroundImage = 'none';
+                    wallpaperDiv.style.opacity = '0';
+                    document.body.style.backgroundColor = '';
+                }
+
+                if (effect === 'blur') {
+                    wallpaperDiv.style.filter = `blur(${blur}px)`;
+                } else {
+                    wallpaperDiv.style.filter = 'none';
+                }
+            });
         })();
     </script>
 </head>
