@@ -1,0 +1,285 @@
+
+/* Streak Page Styles */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stats-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 10px 0;
+    color: var(--text-color);
+}
+
+.stat-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.progress-container {
+    width: 100%;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.streak-flame {
+    font-size: 4rem;
+    text-align: center;
+    margin-top: auto;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.calendar-card-large {
+    grid-column: 1 / -1;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendar-day:hover {
+    transform: scale(1.1);
+    border-color: var(--primary-color);
+}
+
+.high-activity { background-color: var(--success-color); opacity: 1; color: #fff; }
+.medium-activity { background-color: var(--success-color); opacity: 0.6; color: #fff; }
+.low-activity { background-color: var(--success-color); opacity: 0.3; color: #fff; }
+
+
+/* Calendar Override */
+.calendar-grid {
+    grid-template-columns: repeat(7, 1fr) !important;
+}
+
+/* New Calendar Styles */
+.calendar-day {
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 0.9rem;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-day:hover {
+    background: #333;
+    transform: none;
+    border-color: transparent;
+}
+
+.calendar-day.other-month {
+    color: #555;
+}
+
+.calendar-day.today-highlight {
+    background-color: #58a6ff; /* Blue highlight */
+    color: #000;
+    font-weight: bold;
+}
+
+/* Override previous calendar styles if needed */
+.calendar-card-large {
+    background: #222 !important;
+    border: none !important;
+}
+
+/* Enhanced Calendar & Stats Styles */
+.calendar-card-large {
+    max-width: 100% !important; /* Increase size */
+    padding: 30px !important;
+}
+
+.calendar-day {
+    font-size: 1.1rem; /* Larger text */
+}
+
+.calendar-day.other-month {
+    opacity: 0.3; /* Faded */
+    color: #888;
+}
+
+.streak-icon {
+    font-size: 0.8em;
+    margin-left: 2px;
+}
+
+/* Stats Controls */
+.stats-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.view-selector, .range-selector {
+    display: flex;
+    background: var(--input-bg);
+    border-radius: 8px;
+    padding: 3px;
+    border: 1px solid var(--border-color);
+}
+
+.selector-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    padding: 5px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.selector-btn.active {
+    background: var(--primary-color);
+    color: var(--bg-color);
+    font-weight: bold;
+}
+
+.year-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.year-dropdown.show {
+    display: block;
+}
+
+.year-option {
+    padding: 5px 15px;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.year-option:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.goal-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--text-color);
+    color: var(--text-color);
+    width: 50px;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
+/* Fix for calendar alignment */
+.calendar-day {
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    aspect-ratio: auto !important;
+}
+
+/* Heatmap Styles */
+.heatmap-container {
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+.heatmap-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 10px);
+    grid-auto-flow: column;
+    gap: 3px;
+}
+.heatmap-cell {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background-color: rgba(255,255,255,0.05);
+}
+.heatmap-cell[data-level="1"] { background-color: #0e4429; }
+.heatmap-cell[data-level="2"] { background-color: #006d32; }
+.heatmap-cell[data-level="3"] { background-color: #26a641; }
+.heatmap-cell[data-level="4"] { background-color: #39d353; }
+
+.heatmap-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+.heatmap-stat-item strong {
+    display: block;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
