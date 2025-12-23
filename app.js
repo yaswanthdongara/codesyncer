@@ -425,16 +425,10 @@ function openSettings() {
     if (usernameInput) usernameInput.value = CONFIG.owner || '';
     if (repoInput) repoInput.value = CONFIG.repo || '';
     
-    // Hide AI Key input if default is present
-    if (typeof DEFAULT_AI_KEY !== 'undefined' && DEFAULT_AI_KEY) {
-        if (aiKeyInput) {
-            aiKeyInput.parentElement.style.display = 'none';
-        }
-    } else {
-        if (aiKeyInput) {
-            aiKeyInput.value = localStorage.getItem('ai_api_key') || '';
-            aiKeyInput.parentElement.style.display = 'block';
-        }
+    // Always show AI Key input and allow user to set it
+    if (aiKeyInput) {
+        aiKeyInput.value = localStorage.getItem('ai_api_key') || '';
+        aiKeyInput.parentElement.style.display = 'block';
     }
     
     settingsModal.style.display = 'block';
