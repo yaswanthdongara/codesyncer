@@ -525,6 +525,8 @@ console.log("Hello, World!");
         const importedCode = localStorage.getItem('compiler_code');
         const importedLang = localStorage.getItem('compiler_lang');
         const lastUsedLang = localStorage.getItem('compiler_last_lang');
+        const autosaveCode = localStorage.getItem('autosave_code');
+        const autosaveLang = localStorage.getItem('autosave_lang');
 
         // Default code snippets
         const snippets = {
@@ -550,22 +552,39 @@ public class Main {
         };
 
         if (importedCode) {
+            // Priority 1: Code from Repository
             codeEditor.value = importedCode;
             if (importedLang) {
                 languageSelect.value = importedLang;
                 localStorage.setItem('compiler_last_lang', importedLang);
+                localStorage.setItem('autosave_lang', importedLang);
             }
+            localStorage.setItem('autosave_code', importedCode);
+            
             // Clear storage so it doesn't persist on refresh/navigation
             localStorage.removeItem('compiler_code');
             localStorage.removeItem('compiler_lang');
+        } else if (autosaveCode) {
+            // Priority 2: Autosaved code
+            codeEditor.value = autosaveCode;
+            if (autosaveLang) {
+                languageSelect.value = autosaveLang;
+            }
         } else if (lastUsedLang) {
+            // Priority 3: Default snippet for last used language
             languageSelect.value = lastUsedLang;
             codeEditor.value = snippets[lastUsedLang] || '';
         }
 
+        // Autosave functionality
+        codeEditor.addEventListener('input', () => {
+            localStorage.setItem('autosave_code', codeEditor.value);
+        });
+
         languageSelect.addEventListener('change', () => {
             const lang = languageSelect.value;
             localStorage.setItem('compiler_last_lang', lang);
+            localStorage.setItem('autosave_lang', lang);
             
             // Only overwrite if the current code is empty or matches one of the default snippets
             const currentCode = codeEditor.value.trim();
@@ -573,6 +592,7 @@ public class Main {
             
             if (currentCode === '' || isDefaultSnippet || confirm("Changing language will reset the code editor. Continue?")) {
                 codeEditor.value = snippets[lang] || '';
+                localStorage.setItem('autosave_code', codeEditor.value);
                 outputArea.innerHTML = '';
             } else {
                 // Revert selection if cancelled (optional, but tricky without previous value)
