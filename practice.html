@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Syncer - Practice</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        .practice-layout {
+            display: grid;
+            grid-template-columns: 40% 60%;
+            height: calc(100vh - 70px); /* Adjust for header */
+            gap: 1px;
+            background-color: var(--border-color);
+        }
+        
+        .problem-pane {
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-pane {
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pane-header {
+            padding: 10px 15px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+        }
+
+        .problem-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+            line-height: 1.6;
+        }
+
+        .problem-content h1, .problem-content h2, .problem-content h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+        
+        .problem-content code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: var(--font-family);
+        }
+
+        .problem-content pre {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .difficulty-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .diff-easy { background: rgba(0, 255, 0, 0.1); color: #00ff00; border: 1px solid #00ff00; }
+        .diff-medium { background: rgba(255, 165, 0, 0.1); color: orange; border: 1px solid orange; }
+        .diff-hard { background: rgba(255, 0, 0, 0.1); color: #ff4444; border: 1px solid #ff4444; }
+
+        .import-bar {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #outputPanel {
+            height: 150px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            font-family: var(--font-family);
+            overflow-y: auto;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        /* Resizer */
+        .gutter {
+            background-color: var(--border-color);
+            cursor: col-resize;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display: flex; align-items: center;">
+            <h1>>_ Code Syncer</h1>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="repository.html" class="nav-link">Repository</a>
+                <a href="compiler.html" class="nav-link">Compiler</a>
+                <a href="practice.html" class="nav-link active">Practice</a>
+                <a href="aichat.html" class="nav-link">AI Chat</a>
+                <a href="streak.html" class="nav-link">Streak</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+                <a href="about.html" class="nav-link">About</a>
+            </nav>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="theme-selector">
+                <select id="themeSelect">
+                    <option value="theme-black">Black (Default)</option>
+                    <option value="theme-white">White (Light)</option>
+                    <option value="theme-green">Green (Matrix)</option>
+                    <option value="theme-orange">Orange (Retro)</option>
+                    <option value="theme-blue">Blue (Cyber)</option>
+                    <option value="theme-dark">Dark (Modern)</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <div class="practice-layout">
+        <!-- Left: Problem Description -->
+        <div class="problem-pane">
+            <div class="import-bar">
+                <input type="text" id="problemInput" class="text-input" placeholder="Enter LeetCode URL or Problem Name (e.g. Two Sum)" style="flex: 1;">
+                <button id="importBtn" class="btn btn-small">Import</button>
+            </div>
+            <div id="problemContainer" class="problem-content">
+                <div style="text-align: center; margin-top: 50px; opacity: 0.7;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <h3>Ready to Practice?</h3>
+                    <p>Enter a problem name or URL above to fetch details.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Editor & Output -->
+        <div class="editor-pane">
+            <div class="pane-header">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="languageSelect" class="text-input" style="padding: 5px;">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button id="runBtn" class="btn btn-small" style="background: var(--success-color); color: white;">Run Code</button>
+                    <button id="submitBtn" class="btn btn-small" style="background: var(--primary-color); color: var(--bg-color);">AI Judge</button>
+                </div>
+            </div>
+            <textarea id="codeEditor" style="flex: 1; background: var(--input-bg); color: var(--text-color); border: none; padding: 15px; font-family: var(--font-family); resize: none; outline: none; font-size: 14px; line-height: 1.5;"></textarea>
+            <div id="outputPanel">
+                <div style="color: #888;">Output will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="tracker.js"></script>
+    <script src="practice.js"></script>
+    <script>
+        // Simple Theme Loader
+        const themeSelect = document.getElementById('themeSelect');
+        themeSelect.value = localStorage.getItem('theme') || 'theme-black';
+        document.documentElement.className = themeSelect.value;
+        themeSelect.addEventListener('change', (e) => {
+            document.documentElement.className = e.target.value;
+            localStorage.setItem('theme', e.target.value);
+        });
+    </script>
+</body>
+</html>
