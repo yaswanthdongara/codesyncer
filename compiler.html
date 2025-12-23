@@ -277,16 +277,22 @@ console.log("Hello, World!");
             <div id="explanationContainer" style="display: none; padding: 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius);">
                 <div class="pane-header" style="background: transparent; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; padding-bottom: 10px;">
                     <span style="font-size: 1.2rem; font-weight: bold;">AI Code Explanation</span>
-                    <button id="explainBtn" class="btn btn-small" style="background-color: var(--primary-color); color: var(--bg-color); display: flex; align-items: center; gap: 5px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                        Restart Explanation
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="clearChatBtn" class="btn btn-small" style="background-color: var(--danger-color); color: white; display: flex; align-items: center; gap: 5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Clear
+                        </button>
+                        <button id="explainBtn" class="btn btn-small" style="background-color: var(--primary-color); color: var(--bg-color); display: flex; align-items: center; gap: 5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                            Restart
+                        </button>
+                    </div>
                 </div>
                 <div id="explanationChat" style="min-height: 150px; max-height: 500px; overflow-y: auto; resize: vertical; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: var(--border-radius); font-family: 'Consolas', 'Monaco', monospace; white-space: pre-wrap; line-height: 1.6; margin-bottom: 10px;">
                     <div class="chat-placeholder" style="color: #888;">Click "Explain Code" to start.</div>
                 </div>
                 <div class="chat-input-area" style="display: flex; gap: 10px;">
-                    <input type="text" id="followUpInput" placeholder="Ask a follow-up question..." style="flex: 1; padding: 10px; border-radius: var(--border-radius); border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color);" disabled>
+                    <input type="text" id="followUpInput" placeholder="Ask a follow-up question..." style="flex: 1; padding: 10px; border-radius: var(--border-radius); border: 2px solid var(--success-color); background: var(--input-bg); color: var(--text-color); outline: none;" disabled>
                     <button id="sendFollowUpBtn" class="btn btn-small" style="background-color: var(--primary-color); color: var(--bg-color);" disabled>Send</button>
                 </div>
             </div>
@@ -431,6 +437,7 @@ console.log("Hello, World!");
         const initExplainBtn = document.getElementById('initExplainBtn');
         const explanationContainer = document.getElementById('explanationContainer');
         const explainBtn = document.getElementById('explainBtn');
+        const clearChatBtn = document.getElementById('clearChatBtn');
         const explanationChat = document.getElementById('explanationChat');
         const followUpInput = document.getElementById('followUpInput');
         const sendFollowUpBtn = document.getElementById('sendFollowUpBtn');
@@ -1014,6 +1021,18 @@ Do not include markdown formatting or backticks.`
         });
 
         // AI Explanation Functionality
+        clearChatBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear the chat history?')) {
+                explanationHistory = [];
+                localStorage.removeItem('explanation_history');
+                explanationChat.innerHTML = '<div class="chat-placeholder" style="color: #888;">Click "Explain Code" to start.</div>';
+                followUpInput.disabled = true;
+                sendFollowUpBtn.disabled = true;
+                initExplainBtn.style.display = 'flex';
+                explanationContainer.style.display = 'none';
+            }
+        });
+
         explainBtn.addEventListener('click', async () => {
             const code = codeEditor.value;
             const lang = languageSelect.value;
