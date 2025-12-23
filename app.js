@@ -67,6 +67,7 @@ const viewFileName = document.getElementById('viewFileName');
 const viewFileDescription = document.getElementById('viewFileDescription');
 const viewFileCode = document.getElementById('viewFileCode');
 const downloadFileBtn = document.getElementById('downloadFileBtn');
+const openInCompilerBtn = document.getElementById('openInCompilerBtn');
 
 // New Elements for Folders & Encryption
 const createFileBtn = document.getElementById('createFileBtn');
@@ -191,6 +192,25 @@ function setupEventListeners() {
     }
     
     if (downloadFileBtn) downloadFileBtn.addEventListener('click', downloadCurrentFile);
+    
+    if (openInCompilerBtn) {
+        openInCompilerBtn.addEventListener('click', () => {
+            if (currentViewFile && currentViewFile.content) {
+                // Determine language from filename
+                let lang = 'javascript'; // Default
+                const ext = currentViewFile.name.split('.').pop().toLowerCase();
+                
+                if (ext === 'py') lang = 'python';
+                else if (ext === 'java') lang = 'java';
+                else if (ext === 'html' || ext === 'css') lang = 'html';
+                
+                localStorage.setItem('compiler_code', currentViewFile.content);
+                localStorage.setItem('compiler_lang', lang);
+                localStorage.setItem('compiler_filename', currentViewFile.name);
+                window.location.href = 'compiler.html';
+            }
+        });
+    }
 
     // Search functionality
     if (searchInput) {
