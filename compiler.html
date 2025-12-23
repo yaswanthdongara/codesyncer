@@ -272,7 +272,7 @@ console.log("Hello, World!");
                     Explain Code
                 </button>
             </div>
-            <div id="explanationChat" style="height: 300px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: var(--border-radius); font-family: 'Consolas', 'Monaco', monospace; white-space: pre-wrap; line-height: 1.6; margin-bottom: 10px;">
+            <div id="explanationChat" style="min-height: 150px; max-height: 500px; overflow-y: auto; resize: vertical; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: var(--border-radius); font-family: 'Consolas', 'Monaco', monospace; white-space: pre-wrap; line-height: 1.6; margin-bottom: 10px;">
                 <div class="chat-placeholder" style="color: #888;">Click "Explain Code" to start.</div>
             </div>
             <div class="chat-input-area" style="display: flex; gap: 10px;">
@@ -330,9 +330,40 @@ console.log("Hello, World!");
             } else {
                 div.style.background = 'rgba(255, 255, 255, 0.05)';
                 div.style.borderLeft = '3px solid var(--success-color)';
-                // Simple markdown parsing for AI response
-                const formattedText = escapeHtml(text).replace(/\n/g, '<br>');
-                div.innerHTML = `<strong>AI:</strong><br>${formattedText}`;
+                
+                // Parse code blocks
+                let formattedText = escapeHtml(text);
+                
+                // Replace code blocks with styled divs and "Apply" button
+                // Regex to find ```lang ... ``` blocks. 
+                // Since we escaped HTML, we look for &lt;code&gt; or just the text pattern if escapeHtml didn't handle it yet.
+                // Actually, let's process raw text first, then escape the non-code parts.
+                
+                // Better approach: Split by code blocks
+                const parts = text.split(/```(\w*)\n([\s\S]*?)```/g);
+                
+                let html = `<strong>AI:</strong><br>`;
+                
+                for (let i = 0; i < parts.length; i++) {
+                    if (i % 3 === 0) {
+                        // Normal text
+                        html += escapeHtml(parts[i]).replace(/\n/g, '<br>');
+                    } else if (i % 3 === 1) {
+                        // Language (ignored for now, or used for class)
+                        // parts[i] is the language
+                    } else {
+                        // Code
+                        const code = parts[i];
+                        const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
+                        html += `<div style="margin-top: 10px; background: #111; padding: 10px; border-radius: 4px; position: relative;">
+                            <pre style="margin: 0; overflow-x: auto;"><code>${escapeHtml(code)}</code></pre>
+                            <button onclick="applyCodeToEditor('${codeId}')" style="position: absolute; top: 5px; right: 5px; padding: 4px 8px; background: var(--primary-color); color: var(--bg-color); border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Apply to Editor</button>
+                            <textarea id="${codeId}" style="display: none;">${escapeHtml(code)}</textarea>
+                        </div>`;
+                    }
+                }
+                
+                div.innerHTML = html;
             }
             
             // Remove placeholder if exists
@@ -342,6 +373,18 @@ console.log("Hello, World!");
             explanationChat.appendChild(div);
             explanationChat.scrollTop = explanationChat.scrollHeight;
         }
+
+        // Global function to apply code
+        window.applyCodeToEditor = function(id) {
+            const textarea = document.getElementById(id);
+            if (textarea) {
+                // Decode the escaped HTML back to normal text for the editor
+                const txt = document.createElement('textarea');
+                txt.innerHTML = textarea.value;
+                codeEditor.value = txt.value;
+                alert('Code applied to editor!');
+            }
+        };
 
         // Theme handling
         themeSelect.addEventListener('change', (e) => {
@@ -780,7 +823,7 @@ Do not include markdown formatting or backticks.`
             explanationHistory = [
                 {
                     role: "system",
-                    content: "You are an expert programmer. Explain the code clearly and concisely for a beginner. Focus on the logic and flow. Be ready to answer follow-up questions."
+                    content: "You are an expert programmer. Explain the code clearly and concisely for a beginner. Focus on the logic and flow. Be ready to answer follow-up questions. If you provide code examples, please include comments explaining the logic."
                 },
                 {
                     role: "user",
