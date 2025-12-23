@@ -905,16 +905,18 @@ Do not include markdown formatting or backticks.`
                 
                 aiOriginalCode.innerHTML = lines.map((line, index) => {
                     const lineNum = index + 1;
+                    const content = escapeHtml(line) || '&nbsp;';
                     if (errorLines.has(lineNum)) {
-                        return `<div style="background: rgba(218, 54, 51, 0.2); text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--danger-color); padding: 0 5px;">${escapeHtml(line)}</div>`;
+                        return `<div style="background: rgba(218, 54, 51, 0.2); text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--danger-color); padding: 0 5px; white-space: pre;">${content}</div>`;
                     }
-                    return `<div style="padding: 0 5px;">${escapeHtml(line)}</div>`;
+                    return `<div style="padding: 0 5px; white-space: pre;">${content}</div>`;
                 }).join('');
                 
                 // Render Fixed Code
                 const fixedLines = result.fixed_code.split('\n');
                 aiFixedCode.innerHTML = fixedLines.map(line => {
-                    return `<div style="padding: 0 5px;">${escapeHtml(line)}</div>`;
+                    const content = escapeHtml(line) || '&nbsp;';
+                    return `<div style="padding: 0 5px; white-space: pre;">${content}</div>`;
                 }).join('');
                 
                 // Render Explanation
