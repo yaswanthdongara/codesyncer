@@ -206,7 +206,6 @@ function setupEventListeners() {
                 
                 localStorage.setItem('compiler_code', currentViewFile.content);
                 localStorage.setItem('compiler_lang', lang);
-                localStorage.setItem('compiler_filename', currentViewFile.name);
                 window.location.href = 'compiler.html';
             }
         });

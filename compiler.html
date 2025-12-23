@@ -79,11 +79,11 @@
 
         .code-editor {
             flex: 1;
-            background: var(--input-bg);
-            color: var(--text-color);
+            background: #1e1e1e;
+            color: #d4d4d4;
             border: none;
             padding: 15px;
-            font-family: var(--font-family);
+            font-family: 'Consolas', 'Monaco', monospace;
             font-size: 14px;
             resize: none;
             outline: none;
@@ -92,10 +92,10 @@
 
         .output-area {
             flex: 1;
-            background: var(--input-bg);
-            color: var(--text-color);
+            background: #1e1e1e;
+            color: #d4d4d4;
             padding: 15px;
-            font-family: var(--font-family);
+            font-family: 'Consolas', 'Monaco', monospace;
             font-size: 14px;
             overflow-y: auto;
             white-space: pre-wrap;
@@ -205,11 +205,11 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 400px;">
                             <div style="display: flex; flex-direction: column; overflow: hidden;">
                                 <h4 style="color: var(--danger-color); margin-bottom: 5px;">❌ Original Code (Mistakes Underlined)</h4>
-                                <div id="aiOriginalCode" class="output-area" style="flex: 1; overflow: auto; white-space: pre; font-family: var(--font-family); border: 1px solid var(--danger-color);"></div>
+                                <div id="aiOriginalCode" class="output-area" style="flex: 1; overflow: auto; white-space: pre; font-family: 'Consolas', 'Monaco', monospace; border: 1px solid var(--danger-color);"></div>
                             </div>
                             <div style="display: flex; flex-direction: column; overflow: hidden;">
                                 <h4 style="color: var(--success-color); margin-bottom: 5px;">✅ Fixed Code</h4>
-                                <div id="aiFixedCode" class="output-area" style="flex: 1; overflow: auto; white-space: pre; font-family: var(--font-family); border: 1px solid var(--success-color);"></div>
+                                <div id="aiFixedCode" class="output-area" style="flex: 1; overflow: auto; white-space: pre; font-family: 'Consolas', 'Monaco', monospace; border: 1px solid var(--success-color);"></div>
                             </div>
                         </div>
                         <div id="aiExplanation" style="padding: 10px; background: var(--input-bg); border-radius: 4px; border-left: 4px solid var(--primary-color);"></div>
@@ -248,7 +248,7 @@ console.log("Hello, World!");
                 <div class="pane-header">
                     <span>Input</span>
                 </div>
-                <textarea id="inputArea" class="code-editor" style="height: 100px; flex: none; border-bottom: 1px solid var(--border-color);" placeholder="Enter input here..."></textarea>
+                <textarea id="inputArea" class="code-editor" style="height: 100px; flex: none; border-bottom: 1px solid var(--border-color); background: #1e1e1e; color: #d4d4d4; font-family: 'Consolas', 'Monaco', monospace;" placeholder="Enter input here..."></textarea>
                 <div class="pane-header">
                     <span>Output</span>
                     <div style="display: flex; gap: 5px;">
@@ -308,10 +308,7 @@ console.log("Hello, World!");
         // Check for code from repository
         const importedCode = localStorage.getItem('compiler_code');
         const importedLang = localStorage.getItem('compiler_lang');
-        const importedFilename = localStorage.getItem('compiler_filename');
         const lastUsedLang = localStorage.getItem('compiler_last_lang');
-        
-        let currentFilename = null;
 
         // Default code snippets
         const snippets = {
@@ -342,13 +339,9 @@ public class Main {
                 languageSelect.value = importedLang;
                 localStorage.setItem('compiler_last_lang', importedLang);
             }
-            if (importedFilename) {
-                currentFilename = importedFilename;
-            }
             // Clear storage so it doesn't persist on refresh/navigation
             localStorage.removeItem('compiler_code');
             localStorage.removeItem('compiler_lang');
-            localStorage.removeItem('compiler_filename');
         } else if (lastUsedLang) {
             languageSelect.value = lastUsedLang;
             codeEditor.value = snippets[lastUsedLang] || '';
@@ -469,22 +462,16 @@ public class Main {
 
         // Save Functionality
         saveBtn.addEventListener('click', () => {
-            if (currentFilename) {
-                filenameInput.value = currentFilename;
-                commitMessageInput.value = `Update ${currentFilename}`;
-            } else {
-                const lang = languageSelect.value;
-                let ext = '.txt';
-                if (lang === 'javascript') ext = '.js';
-                else if (lang === 'python') ext = '.py';
-                else if (lang === 'java') ext = '.java';
-                else if (lang === 'html') ext = '.html';
-                
-                // Suggest a filename
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                filenameInput.value = `snippet_${timestamp}${ext}`;
-                commitMessageInput.value = '';
-            }
+            const lang = languageSelect.value;
+            let ext = '.txt';
+            if (lang === 'javascript') ext = '.js';
+            else if (lang === 'python') ext = '.py';
+            else if (lang === 'java') ext = '.java';
+            else if (lang === 'html') ext = '.html';
+            
+            // Suggest a filename
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            filenameInput.value = `snippet_${timestamp}${ext}`;
             saveModal.style.display = 'block';
         });
 
@@ -529,9 +516,7 @@ public class Main {
                     if (checkResponse.ok) {
                         const data = await checkResponse.json();
                         sha = data.sha;
-                        
-                        // If it's not the file we opened, or if we didn't open a file, ask for confirmation
-                        if (filename !== currentFilename && !confirm(`File ${filename} already exists. Overwrite?`)) {
+                        if (!confirm(`File ${filename} already exists. Overwrite?`)) {
                             confirmSaveBtn.disabled = false;
                             confirmSaveBtn.innerText = 'Save File';
                             return;
@@ -573,8 +558,6 @@ ${code}`;
                 if (response.ok) {
                     alert('File saved successfully!');
                     saveModal.style.display = 'none';
-                    // Update current filename in case it was a new file or renamed
-                    currentFilename = filename;
                 } else {
                     const errorData = await response.json();
                     alert('Error saving file: ' + (errorData.message || 'Unknown error'));
