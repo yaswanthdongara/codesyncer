@@ -567,9 +567,11 @@ console.log("Hello, World!");
         // Check for code from repository
         const importedCode = localStorage.getItem('compiler_code');
         const importedLang = localStorage.getItem('compiler_lang');
+        const importedFilename = localStorage.getItem('compiler_filename');
         const lastUsedLang = localStorage.getItem('compiler_last_lang');
         const autosaveCode = localStorage.getItem('autosave_code');
         const autosaveLang = localStorage.getItem('autosave_lang');
+        const autosaveFilename = localStorage.getItem('autosave_filename');
 
         // Default code snippets
         const snippets = {
@@ -602,11 +604,15 @@ public class Main {
                 localStorage.setItem('compiler_last_lang', importedLang);
                 localStorage.setItem('autosave_lang', importedLang);
             }
+            if (importedFilename) {
+                localStorage.setItem('autosave_filename', importedFilename);
+            }
             localStorage.setItem('autosave_code', importedCode);
             
             // Clear storage so it doesn't persist on refresh/navigation
             localStorage.removeItem('compiler_code');
             localStorage.removeItem('compiler_lang');
+            localStorage.removeItem('compiler_filename');
         } else if (autosaveCode) {
             // Priority 2: Autosaved code
             codeEditor.value = autosaveCode;
@@ -743,14 +749,31 @@ public class Main {
         saveBtn.addEventListener('click', () => {
             const lang = languageSelect.value;
             let ext = '.txt';
-            if (lang === 'javascript') ext = '.js';
-            else if (lang === 'python') ext = '.py';
-            else if (lang === 'java') ext = '.java';
-            else if (lang === 'html') ext = '.html';
+            let folder = '';
+
+            if (lang === 'javascript') {
+                ext = '.js';
+                folder = 'javascript/';
+            } else if (lang === 'python') {
+                ext = '.py';
+                folder = 'python/';
+            } else if (lang === 'java') {
+                ext = '.java';
+                folder = 'java/';
+            } else if (lang === 'html') {
+                ext = '.html';
+                folder = 'html/';
+            }
             
             // Suggest a filename
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            filenameInput.value = `snippet_${timestamp}${ext}`;
+            const currentFilename = localStorage.getItem('autosave_filename');
+            if (currentFilename) {
+                filenameInput.value = currentFilename;
+            } else {
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                filenameInput.value = `${folder}snippet_${timestamp}${ext}`;
+            }
+            
             saveModal.style.display = 'block';
         });
 

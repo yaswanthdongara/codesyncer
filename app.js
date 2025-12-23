@@ -195,17 +195,21 @@ function setupEventListeners() {
     
     if (openInCompilerBtn) {
         openInCompilerBtn.addEventListener('click', () => {
-            if (currentViewFile && currentViewFile.content) {
+            if (currentViewFile && (currentViewFile.cleanCode || currentViewFile.content)) {
                 // Determine language from filename
                 let lang = 'javascript'; // Default
-                const ext = currentViewFile.name.split('.').pop().toLowerCase();
+                const fileName = currentViewFile.filename || currentViewFile.name;
+                const ext = fileName.split('.').pop().toLowerCase();
                 
                 if (ext === 'py') lang = 'python';
                 else if (ext === 'java') lang = 'java';
                 else if (ext === 'html' || ext === 'css') lang = 'html';
                 
-                localStorage.setItem('compiler_code', currentViewFile.content);
+                localStorage.setItem('compiler_code', currentViewFile.cleanCode || currentViewFile.content);
                 localStorage.setItem('compiler_lang', lang);
+                if (currentViewFile.path) {
+                    localStorage.setItem('compiler_filename', currentViewFile.path);
+                }
                 window.location.href = 'compiler.html';
             }
         });
@@ -1706,7 +1710,10 @@ async function viewFile(url, sha) {
         // Store for download
         currentViewFile = {
             name: title,
-            content: content // Download the full content including metadata
+            filename: data.name,
+            path: data.path,
+            content: content, // Download the full content including metadata
+            cleanCode: code
         };
 
         // Show Modal
