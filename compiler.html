@@ -950,7 +950,10 @@ Do not include markdown formatting or backticks.`
                     })
                 });
 
-                if (!response.ok) throw new Error('AI API Error');
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`AI API Error: ${response.status} ${response.statusText} - ${errText}`);
+                }
 
                 const data = await response.json();
                 let content = data.choices[0].message.content;
@@ -1086,7 +1089,10 @@ Do not include markdown formatting or backticks.`
                     })
                 });
 
-                if (!response.ok) throw new Error('AI API Error');
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`AI API Error: ${response.status} ${response.statusText} - ${errText}`);
+                }
 
                 const data = await response.json();
                 const content = data.choices[0].message.content;
@@ -1136,7 +1142,10 @@ Do not include markdown formatting or backticks.`
                     })
                 });
 
-                if (!response.ok) throw new Error('AI API Error');
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`AI API Error: ${response.status} ${response.statusText} - ${errText}`);
+                }
 
                 const data = await response.json();
                 const content = data.choices[0].message.content;
