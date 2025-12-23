@@ -501,7 +501,7 @@ async function generateAiCode() {
                 'X-Title': 'Code Syncer'
             },
             body: JSON.stringify({
-                model: "openai/gpt-3.5-turbo",
+                model: "meta-llama/llama-3.3-70b-instruct:free",
                 messages: [
                     {
                         role: "system", 
@@ -1924,7 +1924,7 @@ async function processAIResponse(history) {
                 'X-Title': 'Code Syncer'
             },
             body: JSON.stringify({
-                model: "openai/gpt-3.5-turbo",
+                model: "meta-llama/llama-3.3-70b-instruct:free",
                 messages: [
                     {
                         role: "system", 

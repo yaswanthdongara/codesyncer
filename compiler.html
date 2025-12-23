@@ -928,7 +928,7 @@ ${code}`;
                         'X-Title': 'Code Syncer'
                     },
                     body: JSON.stringify({
-                        model: "openai/gpt-3.5-turbo",
+                        model: "meta-llama/llama-3.3-70b-instruct:free",
                         messages: [
                             {
                                 role: "system",
@@ -950,10 +950,7 @@ Do not include markdown formatting or backticks.`
                     })
                 });
 
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`AI API Error: ${response.status} ${response.statusText} - ${errText}`);
-                }
+                if (!response.ok) throw new Error('AI API Error');
 
                 const data = await response.json();
                 let content = data.choices[0].message.content;
@@ -1084,15 +1081,12 @@ Do not include markdown formatting or backticks.`
                         'X-Title': 'Code Syncer'
                     },
                     body: JSON.stringify({
-                        model: "openai/gpt-3.5-turbo",
+                        model: "meta-llama/llama-3.3-70b-instruct:free",
                         messages: explanationHistory
                     })
                 });
 
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`AI API Error: ${response.status} ${response.statusText} - ${errText}`);
-                }
+                if (!response.ok) throw new Error('AI API Error');
 
                 const data = await response.json();
                 const content = data.choices[0].message.content;
@@ -1137,15 +1131,12 @@ Do not include markdown formatting or backticks.`
                         'X-Title': 'Code Syncer'
                     },
                     body: JSON.stringify({
-                        model: "openai/gpt-3.5-turbo",
+                        model: "meta-llama/llama-3.3-70b-instruct:free",
                         messages: explanationHistory
                     })
                 });
 
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`AI API Error: ${response.status} ${response.statusText} - ${errText}`);
-                }
+                if (!response.ok) throw new Error('AI API Error');
 
                 const data = await response.json();
                 const content = data.choices[0].message.content;
@@ -1170,6 +1161,5 @@ Do not include markdown formatting or backticks.`
             }
         });
     </script>
-    <script src="tracker.js"></script>
 </body>
 </html>
