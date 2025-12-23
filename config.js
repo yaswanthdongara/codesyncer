@@ -1,0 +1,1 @@
+const DEFAULT_AI_KEY = "";
