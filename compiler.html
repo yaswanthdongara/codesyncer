@@ -182,6 +182,10 @@
                         <label for="commitMessageInput">Commit Message (Optional)</label>
                         <input type="text" id="commitMessageInput" class="text-input" placeholder="Add new file">
                     </div>
+                    <div class="form-group">
+                        <label for="fileDescriptionInput">Description (Optional)</label>
+                        <textarea id="fileDescriptionInput" class="text-input" placeholder="Add a description for this file..." style="height: 60px; resize: vertical; font-family: inherit;"></textarea>
+                    </div>
                     <button id="confirmSaveBtn" class="btn">Save File</button>
                 </div>
             </div>
@@ -410,6 +414,7 @@ console.log("Hello, World!");
         const closeSaveModalBtn = document.getElementById('closeSaveModalBtn');
         const filenameInput = document.getElementById('filenameInput');
         const commitMessageInput = document.getElementById('commitMessageInput');
+        const fileDescriptionInput = document.getElementById('fileDescriptionInput');
         const confirmSaveBtn = document.getElementById('confirmSaveBtn');
 
         // AI Debug Elements
@@ -763,9 +768,14 @@ public class Main {
                 }
 
                 // Create file content with metadata header
+                const description = fileDescriptionInput.value.trim();
+                let metadata = `Title: ${filename}\nDate: ${new Date().toLocaleString()}`;
+                if (description) {
+                    metadata += `\nDescription: ${description}`;
+                }
+
                 const fileContent = `/*
-Title: ${filename}
-Date: ${new Date().toLocaleString()}
+${metadata}
 */
 
 ${code}`;
