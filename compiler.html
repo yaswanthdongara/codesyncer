@@ -299,7 +299,113 @@ console.log("Hello, World!");
         const languageSelect = document.getElementById('languageSelect');
         const themeSelect = document.getElementById('themeSelect');
         
-        // Save Modal Elements
+        // Editor Enhancements (Auto-close, Indentation)
+        codeEditor.addEventListener('keydown', (e) => {
+            const start = codeEditor.selectionStart;
+            const end = codeEditor.selectionEnd;
+            const value = codeEditor.value;
+            const char = e.key;
+
+            const pairs = {
+                '(': ')',
+                '{': '}',
+                '[': ']',
+                '"': '"',
+                "'": "'",
+                '`': '`'
+            };
+
+            // Handle Tab (Insert spaces)
+            if (char === 'Tab') {
+                e.preventDefault();
+                const before = value.substring(0, start);
+                const after = value.substring(end);
+                codeEditor.value = before + '    ' + after;
+                codeEditor.selectionStart = codeEditor.selectionEnd = start + 4;
+                return;
+            }
+
+            // Handle Enter (Maintain indentation)
+            if (char === 'Enter') {
+                e.preventDefault();
+                const prevChar = value.charAt(start - 1);
+                const nextChar = value.charAt(start);
+                const before = value.substring(0, start);
+                const after = value.substring(end);
+                
+                // Calculate current indentation
+                const lines = before.split('\n');
+                const lastLine = lines[lines.length - 1];
+                const indentation = lastLine.match(/^\s*/)[0];
+
+                if ((prevChar === '{' && nextChar === '}') || 
+                    (prevChar === '(' && nextChar === ')') || 
+                    (prevChar === '[' && nextChar === ']')) {
+                    // Enter between braces: indent inner line, then dedent closing brace
+                    codeEditor.value = before + '\n' + indentation + '    \n' + indentation + after;
+                    codeEditor.selectionStart = codeEditor.selectionEnd = start + indentation.length + 5; 
+                } else {
+                    // Just maintain indentation
+                    codeEditor.value = before + '\n' + indentation + after;
+                    codeEditor.selectionStart = codeEditor.selectionEnd = start + indentation.length + 1;
+                }
+                return;
+            }
+
+            // Handle Backspace (Delete pair)
+            if (char === 'Backspace') {
+                const prevChar = value.charAt(start - 1);
+                const nextChar = value.charAt(start);
+                
+                if ((prevChar === '(' && nextChar === ')') ||
+                    (prevChar === '{' && nextChar === '}') ||
+                    (prevChar === '[' && nextChar === ']') ||
+                    (prevChar === '"' && nextChar === '"') ||
+                    (prevChar === "'" && nextChar === "'") ||
+                    (prevChar === '`' && nextChar === '`')) {
+                    e.preventDefault();
+                    codeEditor.value = value.substring(0, start - 1) + value.substring(end + 1);
+                    codeEditor.selectionStart = codeEditor.selectionEnd = start - 1;
+                    return;
+                }
+            }
+
+            // Handle closing characters (Skip if already present)
+            if (Object.values(pairs).includes(char)) {
+                // Only skip if it's the exact next character and not inside a string/comment (simplified check)
+                if (value.charAt(start) === char) {
+                    e.preventDefault();
+                    codeEditor.selectionStart = codeEditor.selectionEnd = start + 1;
+                    return;
+                }
+            }
+
+            // Handle opening characters (Auto-close)
+            if (pairs[char]) {
+                // Don't auto-close if typing a quote inside a word
+                if ((char === '"' || char === "'" || char === '`') && 
+                    start > 0 && /\w/.test(value.charAt(start - 1))) {
+                    return;
+                }
+
+                e.preventDefault();
+                const before = value.substring(0, start);
+                const selected = value.substring(start, end);
+                const after = value.substring(end);
+                
+                if (start !== end) {
+                    // Wrap selection
+                    codeEditor.value = before + char + selected + pairs[char] + after;
+                    codeEditor.selectionStart = start;
+                    codeEditor.selectionEnd = end + 2;
+                } else {
+                    // Insert pair
+                    codeEditor.value = before + char + pairs[char] + after;
+                    codeEditor.selectionStart = codeEditor.selectionEnd = start + 1;
+                }
+            }
+        });
+
         const saveModal = document.getElementById('saveModal');
         const closeSaveModalBtn = document.getElementById('closeSaveModalBtn');
         const filenameInput = document.getElementById('filenameInput');
