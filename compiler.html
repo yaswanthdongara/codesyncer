@@ -262,6 +262,18 @@ console.log("Hello, World!");
                 <div id="outputArea" class="output-area"></div>
             </div>
         </div>
+
+        <!-- AI Explanation Section -->
+        <div class="explanation-container" style="margin-top: 20px; padding: 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius);">
+            <div class="pane-header" style="background: transparent; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; padding-bottom: 10px;">
+                <span style="font-size: 1.2rem; font-weight: bold;">AI Code Explanation</span>
+                <button id="explainBtn" class="btn btn-small" style="background-color: var(--primary-color); color: var(--bg-color); display: flex; align-items: center; gap: 5px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    Explain Code
+                </button>
+            </div>
+            <div id="explanationArea" style="min-height: 150px; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: var(--border-radius); font-family: 'Consolas', 'Monaco', monospace; white-space: pre-wrap; line-height: 1.6;">Click "Explain Code" to get an AI explanation of your code.</div>
+        </div>
     </div>
 
     <script>
@@ -290,6 +302,10 @@ console.log("Hello, World!");
         const aiDebugText = document.getElementById('aiDebugText');
         const aiDebugError = document.getElementById('aiDebugError');
         const applyFixBtn = document.getElementById('applyFixBtn');
+        
+        // AI Explanation Elements
+        const explainBtn = document.getElementById('explainBtn');
+        const explanationArea = document.getElementById('explanationArea');
 
         // Theme handling
         themeSelect.addEventListener('change', (e) => {
@@ -701,6 +717,68 @@ Do not include markdown formatting or backticks.`
                 codeEditor.value = suggestedFix;
                 aiDebugModal.style.display = 'none';
                 alert('Code updated with AI fix!');
+            }
+        });
+
+        // AI Explanation Functionality
+        explainBtn.addEventListener('click', async () => {
+            const code = codeEditor.value;
+            const lang = languageSelect.value;
+            const key = localStorage.getItem('ai_api_key');
+
+            if (!key) {
+                alert('Please configure your AI API Key in the Repository Settings first.');
+                return;
+            }
+
+            if (!code || code.trim() === '') {
+                alert('Please enter some code to explain.');
+                return;
+            }
+
+            explainBtn.disabled = true;
+            explainBtn.innerHTML = 'Explaining...';
+            explanationArea.innerText = 'Generating explanation...';
+
+            try {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${key}`,
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': 'Code Syncer'
+                    },
+                    body: JSON.stringify({
+                        model: "meta-llama/llama-3.3-70b-instruct:free",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are an expert programmer. Explain the following code clearly and concisely for a beginner. Focus on the logic and flow."
+                            },
+                            {
+                                role: "user",
+                                content: `Language: ${lang}\n\nCode:\n${code}`
+                            }
+                        ]
+                    })
+                });
+
+                if (!response.ok) throw new Error('AI API Error');
+
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                
+                explanationArea.innerText = content;
+
+            } catch (error) {
+                explanationArea.innerText = 'Error: ' + error.message;
+            } finally {
+                explainBtn.disabled = false;
+                explainBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    Explain Code
+                `;
             }
         });
     </script>
