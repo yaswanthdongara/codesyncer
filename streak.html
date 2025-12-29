@@ -83,28 +83,28 @@
         </header>
 
         <div class="main-content" style="padding: 20px; overflow-y: auto;">
+
             <h2 style="margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Usage Statistics</h2>
-            
             <div class="dashboard-grid" style="display: flex; flex-wrap: wrap; gap: 20px;">
                 <!-- Time Spent Card -->
                 <div class="card stats-card" style="flex: 1; min-width: 250px;">
                     <h3>Time Spent Coding</h3>
-                    <div class="stat-value" id="timeSpent">12h 45m</div>
+                    <div class="stat-value" id="timeSpent">0h 0m</div>
                     <div class="stat-subtitle" id="rangeSubtitle">Last 7 Days</div>
                 </div>
 
                 <!-- Submissions Card -->
                 <div class="card stats-card" style="flex: 1; min-width: 250px;">
                     <h3>Total Submissions</h3>
-                    <div class="stat-value" id="submissionCount">142</div>
-                    <div class="stat-subtitle">+23 this week</div>
+                    <div class="stat-value" id="submissionCount">0</div>
+                    <div class="stat-subtitle" id="weeklySubmissions">+0 this week</div>
                     <div class="progress-container" style="margin-top: 20px;">
                         <div class="progress-label">
                             <span>Weekly Goal</span>
-                            <span>23/30</span>
+                            <span id="weeklyGoalProgress">0/30</span>
                         </div>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 76%;"></div>
+                            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
                         </div>
                     </div>
                 </div>
@@ -112,9 +112,9 @@
                 <!-- Current Streak Card -->
                 <div class="card stats-card" style="flex: 1; min-width: 250px;">
                     <h3>Current Streak</h3>
-                    <div class="stat-value" style="color: var(--success-color);">7 Days</div>
-                    <div class="stat-subtitle">Keep it up!</div>
-                    <div class="streak-flame">🔥</div>
+                    <div class="stat-value" id="currentStreak" style="color: var(--success-color);">0 Days</div>
+                    <div class="stat-subtitle" id="streakMessage">Start coding to build your streak!</div>
+                    <div class="streak-flame" id="streakFlame">🔥</div>
                 </div>
             </div>
 
@@ -178,6 +178,7 @@
     </div>
 
     <script>
+
         // Theme Selector Logic (Copied from index.html for consistency)
         const themeSelect = document.getElementById('themeSelect');
         themeSelect.value = localStorage.getItem('theme') || 'theme-black';
@@ -187,106 +188,98 @@
             localStorage.setItem('theme', theme);
         });
 
-        // Calendar Generation
+        // --- Dynamic Wellbeing Logic ---
         let currentDate = new Date();
         let githubData = {};
-        let contributionData = {}; // For heatmap
+        let contributionData = {};
 
-        async function fetchGitHubData() {
-            const username = localStorage.getItem('github_username');
-            const repo = localStorage.getItem('github_repo');
-            const token = localStorage.getItem('github_token');
-
-            if (!username) {
-                console.log("No GitHub username found in localStorage");
-                return;
-            }
-
-            // 1. Fetch Repo Commits (for Calendar)
-            if (repo) {
-                try {
-                    const headers = { 'Accept': 'application/vnd.github.v3+json' };
-                    if (token) headers['Authorization'] = `token ${token}`;
-
-                    const response = await fetch(`https://api.github.com/repos/${username}/${repo}/commits?per_page=100`, { headers });
-                    if (response.ok) {
-                        const commits = await response.json();
-                        githubData = {}; 
-                        commits.forEach(commit => {
-                            const date = commit.commit.author.date.split('T')[0];
-                            githubData[date] = (githubData[date] || 0) + 1;
-                        });
-                        generateCalendar(currentDate);
-                        updateStats(commits);
-                    }
-                } catch (e) {
-                    console.error("GitHub Repo Fetch Error", e);
-                }
-            }
-
-            // 2. Fetch Contribution Data (for Heatmap)
-            // Note: Real contribution graph requires GraphQL or scraping. 
-            // We will try GraphQL if token exists, otherwise fallback to a simulated view or just repo data.
-            if (token) {
-                await fetchGraphQLContributions(username, token);
-            } else {
-                // Fallback: Use the repo data we have for the heatmap (better than nothing)
-                contributionData = { ...githubData };
-                renderHeatmap();
-                calculateStreaks();
-            }
+        // Simulate coding session tracking
+        function startCodingSession() {
+            let start = Date.now();
+            localStorage.setItem('codingSessionStart', start);
         }
 
-        async function fetchGraphQLContributions(username, token) {
-            const query = `
-            query {
-              user(login: "${username}") {
-                contributionsCollection {
-                  contributionCalendar {
-                    totalContributions
-                    weeks {
-                      contributionDays {
-                        contributionCount
-                        date
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            `;
-
-            try {
-                const response = await fetch('https://api.github.com/graphql', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ query })
-                });
-
-                const result = await response.json();
-                if (result.data && result.data.user) {
-                    const calendar = result.data.user.contributionsCollection.contributionCalendar;
-                    
-                    // Process into flat map
-                    contributionData = {};
-                    calendar.weeks.forEach(week => {
-                        week.contributionDays.forEach(day => {
-                            if (day.contributionCount > 0) {
-                                contributionData[day.date] = day.contributionCount;
-                            }
-                        });
-                    });
-                    
-                    renderHeatmap(calendar.weeks);
-                    calculateStreaks();
-                }
-            } catch (e) {
-                console.error("GraphQL Fetch Error", e);
-            }
+        function endCodingSession() {
+            let start = parseInt(localStorage.getItem('codingSessionStart') || '0');
+            if (!start) return;
+            let end = Date.now();
+            let duration = end - start; // ms
+            let prev = parseInt(localStorage.getItem('codingTime') || '0');
+            localStorage.setItem('codingTime', prev + duration);
+            localStorage.removeItem('codingSessionStart');
+            updateWellbeingStats();
         }
+
+        // Simulate submission
+        function addSubmission() {
+            let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            let today = new Date().toISOString().split('T')[0];
+            submissions.push({ date: today });
+            localStorage.setItem('submissions', JSON.stringify(submissions));
+            updateWellbeingStats();
+        }
+
+        // Calculate streak and stats
+        function updateWellbeingStats() {
+            // Coding time
+            let codingTime = parseInt(localStorage.getItem('codingTime') || '0');
+            let minutes = Math.floor(codingTime / 60000);
+            let hours = Math.floor(minutes / 60);
+            minutes = minutes % 60;
+            document.getElementById('timeSpent').textContent = `${hours}h ${minutes}m`;
+
+            // Submissions
+            let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            document.getElementById('submissionCount').textContent = submissions.length;
+
+            // Weekly submissions
+            let weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 6);
+            let weekly = submissions.filter(s => new Date(s.date) >= weekAgo);
+            document.getElementById('weeklySubmissions').textContent = `+${weekly.length} this week`;
+            document.getElementById('weeklyGoalProgress').textContent = `${weekly.length}/30`;
+            let percent = Math.min(100, Math.round((weekly.length / 30) * 100));
+            document.getElementById('progressFill').style.width = percent + '%';
+
+            // Streak calculation
+            let streak = 0;
+            let streakMessage = 'Start coding to build your streak!';
+            let streakFlame = '';
+            if (submissions.length > 0) {
+                // Get unique submission days
+                let days = Array.from(new Set(submissions.map(s => s.date))).sort().reverse();
+                let today = new Date().toISOString().split('T')[0];
+                let current = today;
+                for (let i = 0; i < days.length; i++) {
+                    if (days[i] === current) {
+                        streak++;
+                        let d = new Date(current);
+                        d.setDate(d.getDate() - 1);
+                        current = d.toISOString().split('T')[0];
+                    } else {
+                        break;
+                    }
+                }
+                if (streak > 0) {
+                    streakMessage = streak >= 7 ? 'Amazing streak! Keep it up!' : 'Keep going!';
+                    streakFlame = '🔥';
+                }
+            }
+            document.getElementById('currentStreak').textContent = `${streak} Days`;
+            document.getElementById('streakMessage').textContent = streakMessage;
+            document.getElementById('streakFlame').textContent = streakFlame;
+        }
+
+        // For demo: simulate coding and submissions
+        window.startCodingSession = startCodingSession;
+        window.endCodingSession = endCodingSession;
+        window.addSubmission = addSubmission;
+
+        // Initial update
+        updateWellbeingStats();
+
+        // --- Existing GitHub/Calendar logic below ---
+        // ...existing code...
 
         function renderHeatmap(weeksData) {
             const heatmapGrid = document.getElementById('githubHeatmap');
@@ -461,57 +454,52 @@
             }
             
             // Current Month Days
+            // Get local submissions
+            let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            let submissionDays = new Set(submissions.map(s => s.date));
             for (let i = 1; i <= daysInMonth; i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day';
                 day.textContent = i;
-                
+
                 // Format date as YYYY-MM-DD
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const submissionCount = githubData[dateStr] || 0;
-                const isStreak = submissionCount > 0;
-                
-                day.dataset.submissions = submissionCount;
+                // Use local submissions for streak icon
+                const isSubmission = submissionDays.has(dateStr);
+                day.dataset.submissions = isSubmission ? 1 : 0;
 
                 // Tooltip Events
                 day.addEventListener('mouseenter', (e) => {
                     const tooltip = document.getElementById('submission-tooltip');
                     const count = parseInt(e.currentTarget.dataset.submissions);
-                    
                     if (count > 0) {
-                        tooltip.textContent = `${count} submissions`;
-                        tooltip.style.color = '#4caf50'; // Green
+                        tooltip.textContent = `Submission done`;
+                        tooltip.style.color = '#4caf50';
                     } else {
-                        tooltip.textContent = '0 submissions';
-                        tooltip.style.color = '#f44336'; // Red
+                        tooltip.textContent = 'No submission';
+                        tooltip.style.color = '#f44336';
                     }
-                    
                     tooltip.style.display = 'block';
-                    
-                    // Position logic
                     const rect = e.currentTarget.getBoundingClientRect();
                     tooltip.style.left = `${rect.left + window.scrollX + rect.width / 2 - tooltip.offsetWidth / 2}px`;
-                    tooltip.style.top = `${rect.top + window.scrollY - 35}px`; // Position above
+                    tooltip.style.top = `${rect.top + window.scrollY - 35}px`;
                 });
-
                 day.addEventListener('mouseleave', () => {
                     document.getElementById('submission-tooltip').style.display = 'none';
                 });
-                
+
                 if (today.getMonth() === month && today.getFullYear() === year) {
                     if (i === today.getDate()) {
                         day.classList.add('today-highlight');
                     }
-                    
-                    if (isStreak) {
-                        const icon = document.createElement('span');
-                        icon.className = 'streak-icon';
-                        icon.textContent = '⚡';
-                        day.appendChild(icon);
-                        day.style.color = '#fff'; // Ensure text is visible
-                    }
                 }
-                
+                if (isSubmission) {
+                    const icon = document.createElement('span');
+                    icon.className = 'streak-icon';
+                    icon.textContent = '⚡';
+                    day.appendChild(icon);
+                    day.style.color = '#fff';
+                }
                 calendarGrid.appendChild(day);
             }
             
