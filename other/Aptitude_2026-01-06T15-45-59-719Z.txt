@@ -1,0 +1,9 @@
+/*
+Title: Aptitude_2026-01-06T15-45-59-719Z.txt
+Description: 
+Date: 1/6/2026, 9:15:59 PM
+*/
+
+(x^n - 1) will be divisibly by (x + 1) only when n is even.
+
+(49^15 - 1) = {(7^2)15 - 1} = (730 - 1), which is divisible by (7 +1), i.e., 8.
