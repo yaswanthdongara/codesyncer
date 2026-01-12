@@ -99,6 +99,7 @@
             font-size: 14px;
             overflow-y: auto;
             white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .run-btn {
@@ -936,11 +937,13 @@ ${code}`;
 Return ONLY a valid JSON object with this structure:
 {
     "explanation": "Brief explanation of the error",
-    "fixed_code": "The complete fixed code string",
+    "fixed_code": "The complete fixed code string with proper formatting and newlines (use \\n for line breaks)",
     "error_lines": [1, 3]
 }
+IMPORTANT: The "fixed_code" must be properly formatted with actual newline characters (\\n) and proper indentation.
+For Java code, ensure proper indentation with 4 spaces per level.
 "error_lines" should be an array of line numbers (1-based) where the errors are located.
-Do not include markdown formatting or backticks.`
+Do not include markdown formatting or backticks in the JSON.`
                             },
                             {
                                 role: "user",
@@ -971,26 +974,38 @@ Do not include markdown formatting or backticks.`
                 const lines = code.split('\n');
                 const errorLines = new Set(result.error_lines || []);
                 
-                aiOriginalCode.innerHTML = lines.map((line, index) => {
-                    const lineNum = index + 1;
-                    const content = escapeHtml(line) || '&nbsp;';
-                    if (errorLines.has(lineNum)) {
-                        return `<div style="background: rgba(218, 54, 51, 0.2); text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--danger-color); padding: 0 5px; white-space: pre;">${content}</div>`;
-                    }
-                    return `<div style="padding: 0 5px; white-space: pre;">${content}</div>`;
-                }).join('');
+                aiOriginalCode.innerHTML = '<pre style="margin: 0; font-family: inherit; background: inherit; padding: 0;">' + 
+                    lines.map((line, index) => {
+                        const lineNum = index + 1;
+                        const content = escapeHtml(line) || '&nbsp;';
+                        if (errorLines.has(lineNum)) {
+                            return `<span style="background: rgba(218, 54, 51, 0.2); text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--danger-color);">${content}</span>`;
+                        }
+                        return content;
+                    }).join('\n') + 
+                    '</pre>';
                 
                 // Render Fixed Code
-                const fixedLines = result.fixed_code.split('\n');
-                aiFixedCode.innerHTML = fixedLines.map(line => {
-                    const content = escapeHtml(line) || '&nbsp;';
-                    return `<div style="padding: 0 5px; white-space: pre;">${content}</div>`;
-                }).join('');
+                // Handle both actual newlines and escaped \n characters
+                let fixedCode = result.fixed_code;
+                // If the code contains literal \n strings, replace them with actual newlines
+                if (!fixedCode.includes('\n') && fixedCode.includes('\\n')) {
+                    fixedCode = fixedCode.replace(/\\n/g, '\n');
+                }
+                // Also handle \t for tabs
+                if (fixedCode.includes('\\t')) {
+                    fixedCode = fixedCode.replace(/\\t/g, '    ');
+                }
+                
+                const fixedLines = fixedCode.split('\n');
+                aiFixedCode.innerHTML = '<pre style="margin: 0; font-family: inherit; background: inherit; padding: 0;">' + 
+                    fixedLines.map(line => escapeHtml(line) || '&nbsp;').join('\n') + 
+                    '</pre>';
                 
                 // Render Explanation
                 aiExplanation.textContent = result.explanation;
                 
-                suggestedFix = result.fixed_code;
+                suggestedFix = fixedCode;
                 
                 aiDebugLoading.style.display = 'none';
                 aiDebugResult.style.display = 'flex';
