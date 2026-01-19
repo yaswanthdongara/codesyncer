@@ -462,8 +462,8 @@ function saveSettings() {
 
 // AI Functions
 function openAiModal() {
-    // Check for default key first, then local storage
-    const key = (typeof DEFAULT_AI_KEY !== 'undefined' && DEFAULT_AI_KEY) ? DEFAULT_AI_KEY : localStorage.getItem('ai_api_key');
+    // Check local storage first, then default
+    const key = localStorage.getItem('ai_api_key') || (typeof DEFAULT_AI_KEY !== 'undefined' ? DEFAULT_AI_KEY : '');
     
     if (!key) {
         alert('Please configure your AI API Key in Settings first.');
@@ -476,7 +476,7 @@ function openAiModal() {
 
 async function generateAiCode() {
     const prompt = aiPromptInput.value.trim();
-    const key = (typeof DEFAULT_AI_KEY !== 'undefined' && DEFAULT_AI_KEY) ? DEFAULT_AI_KEY : localStorage.getItem('ai_api_key');
+    const key = localStorage.getItem('ai_api_key') || (typeof DEFAULT_AI_KEY !== 'undefined' ? DEFAULT_AI_KEY : '');
     
     if (!prompt) return;
     
@@ -1896,7 +1896,7 @@ async function sendChatMessage() {
 }
 
 async function processAIResponse(history) {
-    const key = (typeof DEFAULT_AI_KEY !== 'undefined' && DEFAULT_AI_KEY) ? DEFAULT_AI_KEY : localStorage.getItem('ai_api_key');
+    const key = localStorage.getItem('ai_api_key') || (typeof DEFAULT_AI_KEY !== 'undefined' ? DEFAULT_AI_KEY : '');
 
     // Show loading indicator
     const loadingDiv = document.createElement('div');
