@@ -20,6 +20,8 @@ const CONFIG = {
 
 // DOM Elements
 const languageSelect = document.getElementById('language');
+// Removed algorithmSelect
+
 const codeTitleInput = document.getElementById('codeTitle');
 const codeTextarea = document.getElementById('codeInput');
 const descriptionTextarea = document.getElementById('description');
@@ -154,6 +156,19 @@ function setupEventListeners() {
     if (clearBtn) clearBtn.addEventListener('click', clearForm);
     if (loadBtn) loadBtn.addEventListener('click', fetchFromGitHub);
     if (themeSelect) themeSelect.addEventListener('change', changeTheme);
+    
+    // Algorithm Selection for Home Page - now handled by custom select in index.html logic or setupCustomSelect
+    /*
+    if (algorithmSelect) {
+        algorithmSelect.addEventListener('change', () => {
+             const algo = algorithmSelect.value;
+             if (algo) {
+                 localStorage.setItem('selected_algorithm', algo);
+                 window.location.assign('compiler.html');
+             }
+        });
+    }
+    */
     
     // Settings Modal
     if (settingsBtn) settingsBtn.addEventListener('click', openSettings);
@@ -619,6 +634,7 @@ async function createRepository() {
 
 // Theme Handling
 function changeTheme() {
+    if (!themeSelect) return;
     document.documentElement.className = themeSelect.value;
     localStorage.setItem('theme', themeSelect.value);
     // Re-apply wallpaper transparency if active, as theme change resets variables
@@ -1753,7 +1769,7 @@ function getExtensionMap() {
         'python': '.py', 'java': '.java', 'javascript': '.js', 'cpp': '.cpp',
         'csharp': '.cs', 'go': '.go', 'rust': '.rs', 'php': '.php',
         'ruby': '.rb', 'swift': '.swift', 'kotlin': '.kt', 'typescript': '.ts',
-        'sql': '.sql', 'html': '.html', 'css': '.css'
+        'sql': '.sql', 'html': '.html', 'css': '.css', 'algorithm': '.txt'
     };
 }
 
