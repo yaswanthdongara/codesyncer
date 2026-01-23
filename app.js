@@ -1040,7 +1040,7 @@ function renderFileList() {
                              <input type="checkbox" class="file-select-checkbox" data-path="${safePath}" onchange="toggleFileSelection('${safePath}')">
                         </div>
                         <div class="grid-icon" onclick="viewFile('${file.url}', '${file.sha}')">
-                            <i class="${iconClass}" style="font-size: 1.5rem;"></i>
+                            <i class="${iconClass}" style="font-size: 48px;"></i>
                         </div>
                         <div class="grid-title" onclick="viewFile('${file.url}', '${file.sha}')">${item.name}</div>
                         <div class="grid-actions">
