@@ -97,7 +97,7 @@ let currentViewFile = null; // { name: string, content: string }
 let allFiles = []; // Store all files for searching
 let currentPath = ''; // Current folder path
 let selectedFiles = new Set(); // Selected files for moving
-let currentViewMode = localStorage.getItem('viewMode') || 'list'; // 'list' or 'grid'
+let currentViewMode = localStorage.getItem('viewMode') || 'grid'; // 'list' or 'grid'
 
 // Folder Security
 const DEFAULT_FOLDER_PASS = '0000';
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } else {
         // Only show status if statusDiv exists (it might not on all pages)
-        if (statusDiv) showStatus('âš ï¸ Please configure your GitHub Token', 'info');
+        if (statusDiv) showStatus('Please configure your GitHub Token', 'info');
     }
 
     // Check for URL parameters (for redirect from repository page)
@@ -353,7 +353,7 @@ function setupFontSize() {
     const decreaseFontBtn = document.getElementById('decreaseFontBtn');
     
     // If elements don't exist (e.g. on repository page), just apply saved font size to body
-    let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 14;
+    let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 18;
     document.body.style.fontSize = `${currentFontSize}px`;
 
     if (!fontSizeDisplay || !increaseFontBtn || !decreaseFontBtn) return;
@@ -469,7 +469,7 @@ function saveSettings() {
         localStorage.setItem('github_repo', repo);
         if (aiKey) localStorage.setItem('ai_api_key', aiKey);
         
-        showStatus('âœ… Configuration saved successfully', 'success');
+        showStatus('Configuration saved successfully', 'success');
         closeSettings();
         if (typeof fetchFromGitHub === 'function') {
             fetchFromGitHub();
@@ -581,7 +581,7 @@ function acceptAiCode() {
     aiModal.style.display = 'none';
     aiPromptInput.value = '';
     aiResultContainer.style.display = 'none';
-    showStatus('âœ¨ Code inserted!', 'success');
+    showStatus('Code inserted!', 'success');
 }
 
 async function createRepository() {
@@ -617,7 +617,7 @@ async function createRepository() {
         });
 
         if (response.status === 201) {
-            alert(`âœ… Repository "${repoName}" created successfully!`);
+            alert(`Repository "${repoName}" created successfully!`);
             // Auto-fill username if empty (we can get it from the response owner.login)
             const data = await response.json();
             if (usernameInput && !usernameInput.value) {
@@ -625,14 +625,14 @@ async function createRepository() {
             }
             saveSettings(); // Save the new config
         } else if (response.status === 422) {
-            alert('âŒ Repository already exists or name is invalid.');
+            alert('Repository already exists or name is invalid.');
         } else {
             const error = await response.json();
-            alert(`âŒ Error: ${error.message}`);
+            alert(`Error: ${error.message}`);
         }
     } catch (error) {
         console.error(error);
-        alert('âŒ Network Error');
+        alert('Network Error');
     } finally {
         createRepoBtn.disabled = false;
         createRepoBtn.textContent = 'Create Repo';
@@ -726,11 +726,11 @@ async function saveToGitHub() {
     const description = descriptionTextarea.value.trim();
 
     if (!token) {
-        showStatus('âŒ GitHub Token is missing in configuration', 'error');
+        showStatus('GitHub Token is missing in configuration', 'error');
         return;
     }
     if (!code) {
-        showStatus('âŒ Please enter some code', 'error');
+        showStatus('Please enter some code', 'error');
         return;
     }
 
@@ -821,13 +821,13 @@ ${code}`;
             throw new Error(error.message);
         }
 
-        showStatus(`âœ… Saved to ${path}`, 'success');
+        showStatus(`Saved to ${path}`, 'success');
         resetForm();
         fetchFromGitHub(); // Refresh list
 
     } catch (error) {
         console.error(error);
-        showStatus('âŒ Error: ' + error.message, 'error');
+        showStatus('Error: ' + error.message, 'error');
     } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save to GitHub';
@@ -840,7 +840,7 @@ async function fetchFromGitHub() {
 
     const token = CONFIG.token;
     if (!token) {
-        showStatus('âŒ GitHub Token is missing in configuration', 'error');
+        showStatus('GitHub Token is missing in configuration', 'error');
         return;
     }
 
@@ -886,7 +886,7 @@ async function fetchFromGitHub() {
     } catch (error) {
         console.error(error);
         savedCodesDiv.innerHTML = '<p class="empty-message">Connection Failed</p>';
-        showStatus('âŒ Error: ' + error.message, 'error');
+        showStatus('Error: ' + error.message, 'error');
     } finally {
         loadBtn.disabled = false;
         loadBtn.textContent = 'Refresh';
@@ -1040,7 +1040,7 @@ function renderFileList() {
                              <input type="checkbox" class="file-select-checkbox" data-path="${safePath}" onchange="toggleFileSelection('${safePath}')">
                         </div>
                         <div class="grid-icon" onclick="viewFile('${file.url}', '${file.sha}')">
-                            <i class="${iconClass}" style="font-size: 3rem;"></i>
+                            <i class="${iconClass}" style="font-size: 1.5rem;"></i>
                         </div>
                         <div class="grid-title" onclick="viewFile('${file.url}', '${file.sha}')">${item.name}</div>
                         <div class="grid-actions">
@@ -1182,10 +1182,10 @@ async function createNewFile() {
             throw new Error(err.message || 'Failed to create file');
         }
 
-        showStatus(`âœ… File created successfully!`, 'success');
+        showStatus(`File created successfully!`, 'success');
         setTimeout(fetchFromGitHub, 500);
     } catch (error) {
-        showStatus('âŒ Failed to create file: ' + error.message, 'error');
+        showStatus('Failed to create file: ' + error.message, 'error');
         console.error(error);
     }
 }
@@ -1227,11 +1227,11 @@ async function createNewFolder() {
             throw new Error(err.message || 'Failed to create folder');
         }
         
-        showStatus('âœ… Folder created', 'success');
+        showStatus('Folder created', 'success');
         setTimeout(fetchFromGitHub, 500); // Small delay for API consistency
     } catch (error) {
         console.error(error);
-        showStatus(`âŒ Error creating folder: ${error.message}`, 'error');
+        showStatus(`Error creating folder: ${error.message}`, 'error');
     }
 }
 
@@ -1297,7 +1297,7 @@ async function moveSelectedFiles() {
         }
     }
     
-    showStatus('âœ… Move completed', 'success');
+    showStatus('Move completed', 'success');
     selectedFiles.clear();
     fetchFromGitHub();
 }
@@ -1530,7 +1530,7 @@ async function editFile(url, path, sha) {
         
     } catch (error) {
         console.error(error);
-        showStatus(`âŒ Error loading file: ${error.message}`, 'error');
+        showStatus(`Error loading file: ${error.message}`, 'error');
     }
 }
 
@@ -1591,7 +1591,7 @@ async function deleteFile(path, sha, checkEncryption = false) {
             throw new Error('Failed to delete file');
         }
 
-        showStatus(`ðŸ—‘ï¸ Deleted ${path}`, 'success');
+        showStatus(`Deleted ${path}`, 'success');
         
         // If we are in editor or modal, redirect or close
         if (editingFile && editingFile.path === path) {
@@ -1607,7 +1607,7 @@ async function deleteFile(path, sha, checkEncryption = false) {
 
     } catch (error) {
         console.error(error);
-        showStatus('âŒ Error deleting file', 'error');
+        showStatus('Error deleting file', 'error');
     }
 }
 
@@ -1746,11 +1746,11 @@ async function viewFile(url, sha) {
 
         // Show Modal
         fileViewModal.style.display = 'block';
-        showStatus('âœ… File loaded', 'success');
+        showStatus('File loaded', 'success');
         
     } catch (error) {
         console.error(error);
-        showStatus(`âŒ Error loading file content: ${error.message}`, 'error');
+        showStatus(`Error loading file content: ${error.message}`, 'error');
     }
 }
 
@@ -1766,14 +1766,14 @@ function downloadCurrentFile() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
-    showStatus('â¬‡ï¸ Download started', 'success');
+    showStatus('Download started', 'success');
 }
 
 function copyToClipboard(btn) {
     const text = btn.previousElementSibling.textContent;
     navigator.clipboard.writeText(text);
     const original = btn.textContent;
-    btn.textContent = 'âœ… Copied';
+    btn.textContent = 'Copied';
     setTimeout(() => btn.textContent = original, 2000);
 }
 

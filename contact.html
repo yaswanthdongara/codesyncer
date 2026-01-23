@@ -10,8 +10,10 @@
     <script>
         (function() {
             // Theme Loader
-            const savedTheme = localStorage.getItem('theme') || 'theme-black';
-            document.documentElement.className = savedTheme;
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.className = savedTheme;
+            }
 
             // Wallpaper Loader (Prevents Flash)
             const url = localStorage.getItem('wallpaper_url') || '';

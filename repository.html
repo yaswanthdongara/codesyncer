@@ -11,8 +11,10 @@
     <script>
         (function() {
             // Theme Loader
-            const savedTheme = localStorage.getItem('theme') || 'theme-black';
-            document.documentElement.className = savedTheme;
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.className = savedTheme;
+            }
 
             // Wallpaper Loader (Prevents Flash)
             const url = localStorage.getItem('wallpaper_url') || '';
@@ -182,7 +184,7 @@
 
         <div class="files-section" style="height: 100%;">
             <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2>📂 Repository</h2>
+                <h2>Repository</h2>
                 <div style="display: flex; gap: 10px;">
                     <div class="view-switcher" style="display: flex; border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden;">
                         <button id="listViewBtn" class="btn-icon active" title="List View" style="border: none; border-radius: 0; padding: 5px 10px;">
@@ -199,7 +201,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <input type="text" id="searchInput" class="text-input" placeholder="🔍 Search files...">
+                <input type="text" id="searchInput" class="text-input" placeholder="Search files...">
             </div>
             <div id="breadcrumb" class="breadcrumb" style="margin-bottom: 10px; font-family: monospace; color: var(--primary-color);">
                 <span class="breadcrumb-item" data-path="" style="cursor: pointer;">root</span>

@@ -196,16 +196,16 @@
                 </div>
                 <div class="modal-body">
                     <div id="aiDebugLoading" style="display: none; text-align: center; padding: 20px;">
-                        <p>🤖 Analyzing error...</p>
+                        <p>Analyzing error...</p>
                     </div>
                     <div id="aiDebugResult" style="display: none; flex-direction: column; gap: 15px;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 400px;">
                             <div style="display: flex; flex-direction: column; overflow: hidden;">
-                                <h4 style="color: var(--danger-color); margin-bottom: 5px;">❌ Original Code (Mistakes Underlined)</h4>
+                                <h4 style="color: var(--danger-color); margin-bottom: 5px;">Original Code (Mistakes Underlined)</h4>
                                 <div id="aiOriginalCode" class="output-area" style="flex: 1; overflow: auto; white-space: pre; font-family: 'Consolas', 'Monaco', monospace; border: 1px solid var(--danger-color);"></div>
                             </div>
                             <div style="display: flex; flex-direction: column; overflow: hidden;">
-                                <h4 style="color: var(--success-color); margin-bottom: 5px;">✅ Fixed Code</h4>
+                                <h4 style="color: var(--success-color); margin-bottom: 5px;">Fixed Code</h4>
                                 <div id="aiFixedCode" class="output-area" style="flex: 1; overflow: auto; white-space: pre; font-family: 'Consolas', 'Monaco', monospace; border: 1px solid var(--success-color);"></div>
                             </div>
                         </div>
@@ -612,16 +612,18 @@ public class Main {
         };
 
         // Theme handling
-        themeSelect.addEventListener('change', (e) => {
-            const theme = e.target.value;
-            document.documentElement.className = theme;
-            localStorage.setItem('theme', theme);
-        });
+        if (themeSelect) {
+            themeSelect.addEventListener('change', (e) => {
+                const theme = e.target.value;
+                document.documentElement.className = theme;
+                localStorage.setItem('theme', theme);
+            });
+        }
 
         // Set initial theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
-            themeSelect.value = savedTheme;
+            if (themeSelect) themeSelect.value = savedTheme;
             document.documentElement.className = savedTheme;
         }
 
@@ -725,7 +727,7 @@ public class Main {
 
                     // Display output
                     if (logs.length > 0) {
-                        outputArea.innerText = logs.join('\\n');
+                        outputArea.innerText = logs.join('\n');
                     } else {
                         outputArea.innerText = 'Code executed successfully (no output).';
                     }
