@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Syncer - Repository</title>
+    <link rel="icon" href="OIP.webp" type="image/webp">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -53,35 +54,18 @@
     <div class="full-screen-layout" style="grid-template-columns: 1fr;">
         <header>
             <div style="display: flex; align-items: center;">
-                <h1>>_ Code Syncer</h1>
-                <nav class="main-nav">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="OIP.webp" alt="Logo" style="height: 32px; border-radius: 5px;">
+                    <h1>Code Syncer</h1>
+                </div>
+                <nav class="main-nav" style="margin-left: 20px;">
                     <a href="index.html" class="nav-link">Home</a>
                     <a href="repository.html" class="nav-link active">Repository</a>
                     <a href="compiler.html" class="nav-link">Compiler</a>
-                    <a href="aichat.html" class="nav-link">AI Chat</a>
                     <a href="contact.html" class="nav-link">Contact</a>
-                    <a href="about.html" class="nav-link">About</a>
                 </nav>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <div class="font-controls" style="display: flex; gap: 5px; align-items: center; margin-right: 10px;">
-                    <button id="decreaseFontBtn" class="btn btn-small" style="font-weight: bold; width: 30px;">-</button>
-                    <div id="fontSizeDisplay" style="padding: 5px 10px; border: 1px solid var(--border-color); background: var(--input-bg); border-radius: var(--border-radius); min-width: 40px; text-align: center; font-size: 0.9rem;">14px</div>
-                    <button id="increaseFontBtn" class="btn btn-small" style="font-weight: bold; width: 30px;">+</button>
-                </div>
-                <button id="settingsBtn" class="btn-icon" title="Profile Settings">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </button>
-                <div class="theme-selector">
-                    <select id="themeSelect">
-                        <option value="theme-black">Black (Default)</option>
-                        <option value="theme-white">White (Light)</option>
-                        <option value="theme-green">Green (Matrix)</option>
-                        <option value="theme-orange">Orange (Retro)</option>
-                        <option value="theme-blue">Blue (Cyber)</option>
-                        <option value="theme-dark">Dark (Modern)</option>
-                    </select>
-                </div>
             </div>
         </header>
 
@@ -170,15 +154,21 @@
 
         <!-- File View Modal -->
         <div id="fileViewModal" class="modal file-view-modal">
-            <div class="modal-content file-view-content">
+            <div class="modal-content file-view-content full-screen">
                 <div class="modal-header">
                     <h2 id="viewFileName">Filename.ext</h2>
+                    <div class="file-view-controls" style="display: flex; gap: 10px; align-items: center; margin-left: 20px; flex-grow: 1; justify-content: flex-end; margin-right: 10px;">
+                        <input type="text" id="fileSearchInput" placeholder="Find in file..." class="text-input" style="padding: 5px; height: 30px; width: 200px;">
+                        <button id="fileSearchBtn" class="btn btn-small" title="Search Text" style="padding: 5px 10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </button>
+                    </div>
                     <span id="closeFileViewBtn" class="close">&times;</span>
                 </div>
                 <div class="modal-body">
                     <div id="viewFileDescription" class="file-description"></div>
                     <div class="code-container">
-                        <pre id="viewFileCode" class="code-block"></pre>
+                        <div id="viewFileCode" class="code-block" style="white-space: pre-wrap; font-family: var(--font-family); color: var(--text-color); overflow: auto;"></div>
                     </div>
                     <div class="file-view-actions">
                         <button id="openInCompilerBtn" class="btn" style="background-color: var(--primary-color); color: var(--bg-color);">Open in Compiler</button>

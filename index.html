@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Syncer - Hacker Terminal</title>
+    <title>Code Syncer</title>
+    <link rel="icon" href="OIP.webp" type="image/webp">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
     <script>
@@ -55,35 +56,21 @@
     <div class="full-screen-layout" style="grid-template-columns: 1fr;">
         <header>
             <div style="display: flex; align-items: center;">
-                <h1>>_ Code Syncer</h1>
-                <nav class="main-nav">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="OIP.webp" alt="Logo" style="height: 32px; border-radius: 5px;">
+                    <h1>Code Syncer</h1>
+                </div>
+                <nav class="main-nav" style="margin-left: 20px;">
                     <a href="index.html" class="nav-link active">Home</a>
                     <a href="repository.html" class="nav-link">Repository</a>
                     <a href="compiler.html" class="nav-link">Compiler</a>
-                    <a href="aichat.html" class="nav-link">AI Chat</a>
                     <a href="contact.html" class="nav-link">Contact</a>
-                    <a href="about.html" class="nav-link">About</a>
                 </nav>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <div class="font-controls" style="display: flex; gap: 5px; align-items: center; margin-right: 10px;">
-                    <button id="decreaseFontBtn" class="btn btn-small" style="font-weight: bold; width: 30px;">-</button>
-                    <div id="fontSizeDisplay" style="padding: 5px 10px; border: 1px solid var(--border-color); background: var(--input-bg); border-radius: var(--border-radius); min-width: 40px; text-align: center; font-size: 0.9rem;">14px</div>
-                    <button id="increaseFontBtn" class="btn btn-small" style="font-weight: bold; width: 30px;">+</button>
-                </div>
                 <button id="settingsBtn" class="btn-icon" title="Profile Settings">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
-                <div class="theme-selector">
-                    <select id="themeSelect">
-                        <option value="theme-black">Black (Default)</option>
-                        <option value="theme-white">White (Light)</option>
-                        <option value="theme-green">Green (Matrix)</option>
-                        <option value="theme-orange">Orange (Retro)</option>
-                        <option value="theme-blue">Blue (Cyber)</option>
-                        <option value="theme-dark">Dark (Modern)</option>
-                    </select>
-                </div>
             </div>
         </header>
 
@@ -138,6 +125,29 @@
                             <option value="normal">Normal</option>
                             <option value="blur">Blur</option>
                         </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                            <label style="margin: 0;">App Theme</label>
+                        </div>
+                        <select id="themeSelect" class="text-input">
+                            <option value="theme-black">Black (Default)</option>
+                            <option value="theme-white">White (Light)</option>
+                            <option value="theme-green">Green (Matrix)</option>
+                            <option value="theme-orange">Orange (Retro)</option>
+                            <option value="theme-blue">Blue (Cyber)</option>
+                            <option value="theme-dark">Dark (Modern)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Font Size</label>
+                        <div class="font-controls" style="display: flex; gap: 5px; align-items: center;">
+                            <button id="decreaseFontBtn" class="btn btn-small" style="font-weight: bold; width: 30px;">-</button>
+                            <div id="fontSizeDisplay" style="padding: 5px 10px; border: 1px solid var(--border-color); background: var(--input-bg); border-radius: var(--border-radius); min-width: 40px; text-align: center; font-size: 0.9rem;">14px</div>
+                            <button id="increaseFontBtn" class="btn btn-small" style="font-weight: bold; width: 30px;">+</button>
+                        </div>
                     </div>
                     <div class="form-group" style="display: none; align-items: center; gap: 10px;">
                         <label for="wallpaperBlurRange" style="margin: 0;">Blur Level:</label>
@@ -273,12 +283,40 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                     </button>
                 </div>
-                <textarea 
-                    id="codeInput" 
-                    class="code-textarea" 
-                    placeholder="// Write your code here..."
+
+                <!-- Rich Text Toolbar -->
+                <div class="rich-text-toolbar">
+                    <button class="rich-text-btn" data-command="bold" title="Bold"><b>B</b></button>
+                    <button class="rich-text-btn" data-command="italic" title="Italic"><i>I</i></button>
+                    <button class="rich-text-btn" data-command="underline" title="Underline"><u>U</u></button>
+                    <span style="width: 1px; background: var(--border-color); height: 20px; margin: 0 5px;"></span>
+                    <button class="rich-text-btn" data-command="justifyLeft" title="Align Left">←</button>
+                    <button class="rich-text-btn" data-command="justifyCenter" title="Align Center">↔</button>
+                    <button class="rich-text-btn" data-command="justifyRight" title="Align Right">→</button>
+                    <span style="width: 1px; background: var(--border-color); height: 20px; margin: 0 5px;"></span>
+                    <button class="rich-text-btn" data-command="formatBlock" data-val="H1" title="Heading 1">H1</button>
+                    <button class="rich-text-btn" data-command="formatBlock" data-val="H2" title="Heading 2">H2</button>
+                    <button class="rich-text-btn" data-command="formatBlock" data-val="H3" title="Heading 3">H3</button>
+                    <button class="rich-text-btn" data-command="formatBlock" data-val="p" title="Paragraph">P</button>
+                    <span style="width: 1px; background: var(--border-color); height: 20px; margin: 0 5px;"></span>
+                    
+                    <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 0 5px; border-radius: 3px;">
+                        <input type="color" id="highlightColorPicker" value="#ffd700" title="Choose Color" style="width: 20px; height: 20px; border: none; padding: 0; background: none; cursor: pointer; margin-right: 5px;">
+                        <button class="rich-text-btn" id="highlightBtn" title="Highlight Selection" style="border: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>
+                        </button>
+                    </div>
+
+                    <button class="rich-text-btn" data-command="removeFormat" title="Clear Format">Clear</button>
+                </div>
+
+                <div 
+                    id="richCodeInput" 
+                    class="code-input-div" 
+                    contenteditable="true"
                     spellcheck="false"
-                ></textarea>
+                ></div>
+                <textarea id="codeInput" style="display: none;"></textarea>
             </div>
 
             <div class="form-group">

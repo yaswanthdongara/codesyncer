@@ -1,4 +1,4 @@
-// ===================================
+﻿// ===================================
 // CONFIGURATION
 // ===================================
 const CONFIG = {
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } else {
         // Only show status if statusDiv exists (it might not on all pages)
-        if (statusDiv) showStatus('⚠️ Please configure your GitHub Token', 'info');
+        if (statusDiv) showStatus('âš ï¸ Please configure your GitHub Token', 'info');
     }
 
     // Check for URL parameters (for redirect from repository page)
@@ -352,16 +352,20 @@ function setupFontSize() {
     const increaseFontBtn = document.getElementById('increaseFontBtn');
     const decreaseFontBtn = document.getElementById('decreaseFontBtn');
     
+    // If elements don't exist (e.g. on repository page), just apply saved font size to body
     let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 14;
+    document.body.style.fontSize = `${currentFontSize}px`;
+
+    if (!fontSizeDisplay || !increaseFontBtn || !decreaseFontBtn) return;
 
     function updateFontSize() {
         document.body.style.fontSize = `${currentFontSize}px`;
-        fontSizeDisplay.textContent = `${currentFontSize}px`;
+        if (fontSizeDisplay) fontSizeDisplay.textContent = `${currentFontSize}px`;
         localStorage.setItem('fontSize', currentFontSize);
     }
 
-    // Initialize
-    updateFontSize();
+    // Initialize display
+    if (fontSizeDisplay) fontSizeDisplay.textContent = `${currentFontSize}px`;
 
     increaseFontBtn.addEventListener('click', () => {
         if (currentFontSize < 32) {
@@ -465,7 +469,7 @@ function saveSettings() {
         localStorage.setItem('github_repo', repo);
         if (aiKey) localStorage.setItem('ai_api_key', aiKey);
         
-        showStatus('✅ Configuration saved successfully', 'success');
+        showStatus('âœ… Configuration saved successfully', 'success');
         closeSettings();
         if (typeof fetchFromGitHub === 'function') {
             fetchFromGitHub();
@@ -567,13 +571,17 @@ function acceptAiCode() {
             codeTextarea.value += code;
         }
         
+        // Sync to Rich Text Editor
+        const richCodeInput = document.getElementById('richCodeInput');
+        if (richCodeInput) richCodeInput.innerHTML = codeTextarea.value;
+        
         // Trigger input event to resize if needed
         codeTextarea.dispatchEvent(new Event('input'));
     }
     aiModal.style.display = 'none';
     aiPromptInput.value = '';
     aiResultContainer.style.display = 'none';
-    showStatus('✨ Code inserted!', 'success');
+    showStatus('âœ¨ Code inserted!', 'success');
 }
 
 async function createRepository() {
@@ -609,7 +617,7 @@ async function createRepository() {
         });
 
         if (response.status === 201) {
-            alert(`✅ Repository "${repoName}" created successfully!`);
+            alert(`âœ… Repository "${repoName}" created successfully!`);
             // Auto-fill username if empty (we can get it from the response owner.login)
             const data = await response.json();
             if (usernameInput && !usernameInput.value) {
@@ -617,14 +625,14 @@ async function createRepository() {
             }
             saveSettings(); // Save the new config
         } else if (response.status === 422) {
-            alert('❌ Repository already exists or name is invalid.');
+            alert('âŒ Repository already exists or name is invalid.');
         } else {
             const error = await response.json();
-            alert(`❌ Error: ${error.message}`);
+            alert(`âŒ Error: ${error.message}`);
         }
     } catch (error) {
         console.error(error);
-        alert('❌ Network Error');
+        alert('âŒ Network Error');
     } finally {
         createRepoBtn.disabled = false;
         createRepoBtn.textContent = 'Create Repo';
@@ -647,7 +655,7 @@ function loadTheme() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         document.documentElement.className = savedTheme;
-        themeSelect.value = savedTheme;
+        if (themeSelect) themeSelect.value = savedTheme;
     }
 }
 
@@ -674,6 +682,11 @@ function clearForm() {
 function resetForm() {
     codeTitleInput.value = '';
     codeTextarea.value = '';
+    
+    // Sync to Rich Text Editor
+    const richCodeInput = document.getElementById('richCodeInput');
+    if (richCodeInput) richCodeInput.innerHTML = '';
+
     descriptionTextarea.value = '';
     editingFile = null;
     saveBtn.textContent = 'Save to GitHub';
@@ -713,11 +726,11 @@ async function saveToGitHub() {
     const description = descriptionTextarea.value.trim();
 
     if (!token) {
-        showStatus('❌ GitHub Token is missing in configuration', 'error');
+        showStatus('âŒ GitHub Token is missing in configuration', 'error');
         return;
     }
     if (!code) {
-        showStatus('❌ Please enter some code', 'error');
+        showStatus('âŒ Please enter some code', 'error');
         return;
     }
 
@@ -808,13 +821,13 @@ ${code}`;
             throw new Error(error.message);
         }
 
-        showStatus(`✅ Saved to ${path}`, 'success');
+        showStatus(`âœ… Saved to ${path}`, 'success');
         resetForm();
         fetchFromGitHub(); // Refresh list
 
     } catch (error) {
         console.error(error);
-        showStatus('❌ Error: ' + error.message, 'error');
+        showStatus('âŒ Error: ' + error.message, 'error');
     } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save to GitHub';
@@ -827,7 +840,7 @@ async function fetchFromGitHub() {
 
     const token = CONFIG.token;
     if (!token) {
-        showStatus('❌ GitHub Token is missing in configuration', 'error');
+        showStatus('âŒ GitHub Token is missing in configuration', 'error');
         return;
     }
 
@@ -852,7 +865,7 @@ async function fetchFromGitHub() {
         if (treeResponse.status === 404) {
             // Repository is empty or branch doesn't exist yet
             savedCodesDiv.innerHTML = '<p class="empty-message">Repository is empty (No commits yet)</p>';
-            showStatus('✅ System Online: Repository ready', 'success');
+            showStatus('System Online: Repository ready', 'success');
             return;
         }
 
@@ -868,12 +881,12 @@ async function fetchFromGitHub() {
 
         allFiles = files; // Save for searching
         renderFileList(); // Use new render function
-        showStatus(`✅ System Online: ${files.length} files loaded`, 'success');
+        showStatus(`System Online: ${files.length} files loaded`, 'success');
 
     } catch (error) {
         console.error(error);
         savedCodesDiv.innerHTML = '<p class="empty-message">Connection Failed</p>';
-        showStatus('❌ Error: ' + error.message, 'error');
+        showStatus('âŒ Error: ' + error.message, 'error');
     } finally {
         loadBtn.disabled = false;
         loadBtn.textContent = 'Refresh';
@@ -1169,10 +1182,10 @@ async function createNewFile() {
             throw new Error(err.message || 'Failed to create file');
         }
 
-        showStatus(`✅ File created successfully!`, 'success');
+        showStatus(`âœ… File created successfully!`, 'success');
         setTimeout(fetchFromGitHub, 500);
     } catch (error) {
-        showStatus('❌ Failed to create file: ' + error.message, 'error');
+        showStatus('âŒ Failed to create file: ' + error.message, 'error');
         console.error(error);
     }
 }
@@ -1214,11 +1227,11 @@ async function createNewFolder() {
             throw new Error(err.message || 'Failed to create folder');
         }
         
-        showStatus('✅ Folder created', 'success');
+        showStatus('âœ… Folder created', 'success');
         setTimeout(fetchFromGitHub, 500); // Small delay for API consistency
     } catch (error) {
         console.error(error);
-        showStatus(`❌ Error creating folder: ${error.message}`, 'error');
+        showStatus(`âŒ Error creating folder: ${error.message}`, 'error');
     }
 }
 
@@ -1284,7 +1297,7 @@ async function moveSelectedFiles() {
         }
     }
     
-    showStatus('✅ Move completed', 'success');
+    showStatus('âœ… Move completed', 'success');
     selectedFiles.clear();
     fetchFromGitHub();
 }
@@ -1454,6 +1467,11 @@ async function editFile(url, path, sha) {
 
         // Populate form
         codeTextarea.value = code;
+        
+        // Sync to Rich Text Editor
+        const richCodeInput = document.getElementById('richCodeInput');
+        if (richCodeInput) richCodeInput.innerHTML = code;
+
         codeTitleInput.value = title;
         descriptionTextarea.value = description;
         
@@ -1512,7 +1530,7 @@ async function editFile(url, path, sha) {
         
     } catch (error) {
         console.error(error);
-        showStatus(`❌ Error loading file: ${error.message}`, 'error');
+        showStatus(`âŒ Error loading file: ${error.message}`, 'error');
     }
 }
 
@@ -1573,7 +1591,7 @@ async function deleteFile(path, sha, checkEncryption = false) {
             throw new Error('Failed to delete file');
         }
 
-        showStatus(`🗑️ Deleted ${path}`, 'success');
+        showStatus(`ðŸ—‘ï¸ Deleted ${path}`, 'success');
         
         // If we are in editor or modal, redirect or close
         if (editingFile && editingFile.path === path) {
@@ -1589,7 +1607,7 @@ async function deleteFile(path, sha, checkEncryption = false) {
 
     } catch (error) {
         console.error(error);
-        showStatus('❌ Error deleting file', 'error');
+        showStatus('âŒ Error deleting file', 'error');
     }
 }
 
@@ -1693,7 +1711,7 @@ async function viewFile(url, sha) {
 
         // Populate Modal
         viewFileName.textContent = title;
-        viewFileCode.textContent = code;
+        viewFileCode.innerHTML = code;
         
         if (description) {
             viewFileDescription.textContent = description;
@@ -1728,11 +1746,11 @@ async function viewFile(url, sha) {
 
         // Show Modal
         fileViewModal.style.display = 'block';
-        showStatus('✅ File loaded', 'success');
+        showStatus('âœ… File loaded', 'success');
         
     } catch (error) {
         console.error(error);
-        showStatus(`❌ Error loading file content: ${error.message}`, 'error');
+        showStatus(`âŒ Error loading file content: ${error.message}`, 'error');
     }
 }
 
@@ -1748,14 +1766,14 @@ function downloadCurrentFile() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
-    showStatus('⬇️ Download started', 'success');
+    showStatus('â¬‡ï¸ Download started', 'success');
 }
 
 function copyToClipboard(btn) {
     const text = btn.previousElementSibling.textContent;
     navigator.clipboard.writeText(text);
     const original = btn.textContent;
-    btn.textContent = '✅ Copied';
+    btn.textContent = 'âœ… Copied';
     setTimeout(() => btn.textContent = original, 2000);
 }
 
@@ -2446,3 +2464,225 @@ function saveWallpaperSettings() {
     
     loadAndApplyWallpaper();
 }
+
+/* ==========================================
+   ENHANCEMENTS: Search, Rich Text, Full Screen
+   ========================================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Rich Text Editor Initialization
+    const richInput = document.getElementById('richCodeInput');
+    const hiddenInput = document.getElementById('codeInput');
+    const toolbar = document.querySelector('.rich-text-toolbar');
+
+    if (richInput && hiddenInput && toolbar) {
+        // Sync Initial Value (if any)
+        if (hiddenInput.value) {
+            richInput.innerHTML = hiddenInput.value;
+            if (hiddenInput.value.trim() === '') richInput.innerHTML = '<br>';
+        } else {
+             richInput.innerHTML = '<br>'; // Start with a line
+        }
+
+        // Sync changes to hidden input (for saveToGitHub)
+        richInput.addEventListener('input', () => {
+            hiddenInput.value = richInput.innerHTML; 
+        });
+
+        // Toolbar Button Handlers
+        toolbar.addEventListener('click', (e) => {
+            const btn = e.target.closest('.rich-text-btn');
+            if (!btn) return;
+            e.preventDefault(); // Prevent focus loss
+
+            const command = btn.dataset.command;
+            const value = btn.dataset.val || null;
+
+            if (command === 'formatBlock') {
+                document.execCommand(command, false, value);
+            } else if (command === 'createLink') {
+                const url = prompt('Enter link URL:');
+                if (url) document.execCommand(command, false, url);
+            } else if (command === 'removeFormat') {
+                 document.execCommand(command, false, value);
+            } else {
+                document.execCommand(command, false, value);
+            }
+            
+            richInput.focus();
+        });
+        
+        // Custom Highlight Color Logic
+        const highlightColorPicker = document.getElementById('highlightColorPicker');
+        const highlightBtn = document.getElementById('highlightBtn');
+        
+        const getBrightness = (hex) => {
+            hex = hex.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return (r * 299 + g * 587 + b * 114) / 1000;
+        };
+
+        if (highlightBtn && highlightColorPicker) {
+            highlightBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                richInput.focus();
+                
+                const color = highlightColorPicker.value;
+                const currentBg = document.queryCommandValue('hiliteColor');
+                
+                // Toggle Logic: If background is set (not transparent/white default), turn it off.
+                // Note: queryCommandValue returning transparent/rbg(255,255,255) depends on browser.
+                const isHighlighted = currentBg && currentBg !== 'transparent' && currentBg !== 'rgba(0, 0, 0, 0)' && currentBg !== 'rgb(255, 255, 255)';
+
+                if (isHighlighted) {
+                     // Toggle Off
+                     document.execCommand('hiliteColor', false, 'transparent');
+                     // Reset Text Color to theme default (using style logic is complex, 'inherit' usually works for inner spans)
+                     // But execCommand needs a color. Let's try removing foreColor format first.
+                     document.execCommand('removeFormat', false, null); // This removes all format, maybe ok?
+                     // If removeFormat is too aggressive (removes bold), let's just set color to current TEXT color of editor
+                     // which is var(--text-color). We can't pass var to execCommand.
+                     // Simple solution: Set to 'black' or 'white' based on theme? No.
+                     // Let's use 'removeFormat' BUT re-apply other formats? No that's hard.
+                     // Let's just set background transparent. The test color might remain 'black' or 'white' from previous highlight.
+                     // We should try to reset foreColor.
+                     document.execCommand('foreColor', false, '#c9d1d9'); // Default text color logic is hard. 
+                     // Let's restart: Better to just strip the highlight using removeFormat if strictly needed,
+                     // OR just toggle background and let user fix text color if they want.
+                     // User requirement: "highlighter should be off".
+                     document.execCommand('hiliteColor', false, 'transparent');
+                     // Reset color to something neutral if it was changed
+                     document.execCommand('foreColor', false, 'inherit'); 
+                } else {
+                    // Turn On
+                    document.execCommand('hiliteColor', false, color);
+                    
+                    // Auto-Contrast Text Color
+                    const brightness = getBrightness(color);
+                    if (brightness > 140) { // Light background
+                         document.execCommand('foreColor', false, 'black');
+                    } else { // Dark background
+                         document.execCommand('foreColor', false, 'white');
+                    }
+                }
+            });
+        }
+        
+        // Handle Tab Key in ContentEditable
+        richInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                document.execCommand('insertText', false, '    ');
+            }
+        });
+    }
+
+    // 2. Repository Search & Full Screen Logic
+    const fileSearchBtn = document.getElementById('fileSearchBtn');
+    const fileSearchInput = document.getElementById('fileSearchInput');
+    const viewFileCode = document.getElementById('viewFileCode');
+    
+    // Auto-expand modal on load (It's already CSS class 'full-screen', but just in case)
+    // We can observe style changes or just ensure it.
+    
+    // Search Function
+    if (fileSearchBtn && fileSearchInput && viewFileCode) {
+        let originalContent = '';
+        let lastSearchTerm = '';
+        
+        // Capture content when modal opens
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                     const modal = document.getElementById('fileViewModal');
+                     if (modal && modal.style.display === 'block') {
+                         // Modal opened - Capture content
+                         // We delay slightly to ensure content is populated
+                         setTimeout(() => {
+                             originalContent = viewFileCode.innerHTML;
+                             fileSearchInput.value = '';
+                         }, 100);
+                     }
+                }
+            });
+        });
+        
+        const modal = document.getElementById('fileViewModal');
+        if (modal) {
+            observer.observe(modal, { attributes: true });
+        }
+
+        fileSearchBtn.addEventListener('click', () => {
+             const term = fileSearchInput.value;
+             // Restore if empty
+             if (!term) {
+                 if (originalContent) viewFileCode.innerHTML = originalContent;
+                 return;
+             }
+             
+             // If content hasn't changed from original, use original (to strip previous highlights)
+             // Otherwise we might need to re-read textContent to clear spans.
+             // Best strategy: Always reset to originalContent before search
+             if (originalContent) {
+                 const safeTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                 const regex = new RegExp(safeTerm, 'gi');
+                 
+                 // Reset first
+                 viewFileCode.innerHTML = originalContent;
+                 
+                 // Advanced Tree Walker to highlight ONLY Text Nodes
+                 const walker = document.createTreeWalker(viewFileCode, NodeFilter.SHOW_TEXT, null, false);
+                 const textNodes = [];
+                 while(walker.nextNode()) textNodes.push(walker.currentNode);
+                 
+                 textNodes.forEach(node => {
+                     // Check if node matches
+                     if (regex.test(node.nodeValue)) {
+                         const fragment = document.createDocumentFragment();
+                         let lastIndex = 0;
+                         let match;
+                         
+                         // Reset regex for each node or loop through matches manually
+                         // We need to clone the regex or rely on 'g' flag with exec
+                         const nodeRegex = new RegExp(safeTerm, 'gi');
+                         const text = node.nodeValue;
+                         
+                         while ((match = nodeRegex.exec(text)) !== null) {
+                             // Text before match
+                             const before = text.substring(lastIndex, match.index);
+                             if (before) fragment.appendChild(document.createTextNode(before));
+                             
+                             // The match (wrapped)
+                             const span = document.createElement('span');
+                             span.className = 'highlight-search';
+                             span.textContent = match[0];
+                             fragment.appendChild(span);
+                             
+                             lastIndex = nodeRegex.lastIndex;
+                         }
+                         
+                         // Remaining text
+                         const after = text.substring(lastIndex);
+                         if (after) fragment.appendChild(document.createTextNode(after));
+                         
+                         node.parentNode.replaceChild(fragment, node);
+                     }
+                 });
+             }
+        });
+        
+        fileSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fileSearchBtn.click();
+        });
+        
+        // Clear search on input clear
+        fileSearchInput.addEventListener('input', (e) => {
+             if (e.target.value === '' && originalContent) {
+                 viewFileCode.innerHTML = originalContent;
+             }
+        });
+    }
+});
+// End of script

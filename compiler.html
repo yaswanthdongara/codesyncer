@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Syncer - Online Compiler</title>
+    <link rel="icon" href="OIP.webp" type="image/webp">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -142,27 +143,19 @@
     <div class="full-screen-layout" style="grid-template-columns: 1fr;">
         <header>
             <div style="display: flex; align-items: center;">
-                <h1>>_ Code Syncer</h1>
-                <nav class="main-nav">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="OIP.webp" alt="Logo" style="height: 32px; border-radius: 5px;">
+                    <h1>Code Syncer</h1>
+                </div>
+                <nav class="main-nav" style="margin-left: 20px;">
                     <a href="index.html" class="nav-link">Home</a>
                     <a href="repository.html" class="nav-link">Repository</a>
                     <a href="compiler.html" class="nav-link active">Compiler</a>
-                    <a href="aichat.html" class="nav-link">AI Chat</a>
                     <a href="contact.html" class="nav-link">Contact</a>
-                    <a href="about.html" class="nav-link">About</a>
                 </nav>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <div class="theme-selector">
-                    <select id="themeSelect">
-                        <option value="theme-black">Black (Default)</option>
-                        <option value="theme-white">White (Light)</option>
-                        <option value="theme-green">Green (Matrix)</option>
-                        <option value="theme-orange">Orange (Retro)</option>
-                        <option value="theme-blue">Blue (Cyber)</option>
-                        <option value="theme-dark">Dark (Modern)</option>
-                    </select>
-                </div>
+                <!-- Theme selector removed -->
             </div>
         </header>
 
