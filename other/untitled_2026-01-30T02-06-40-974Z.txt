@@ -1,0 +1,7 @@
+/*
+Title: untitled_2026-01-30T02-06-40-974Z.txt
+Description: 
+Date: 1/30/2026, 7:36:40 AM
+*/
+
+&lt;input id="num1" placeholder="Enter number 1"&gt;<div>&lt;input id="num2" placeholder="Enter number 2"&gt;</div><div>&lt;button onclick="add()"&gt;Add&lt;/button&gt;</div><div><br></div><div>&lt;p id="result"&gt;&lt;/p&gt;</div><div><br></div><div>function add() {</div><div>  const n1 = Number(document.getElementById("num1").value);</div><div>  const n2 = Number(document.getElementById("num2").value);</div><div><br></div><div>  const sum = n1 + n2;</div><div><br></div><div>  document.getElementById("result").innerText = "Result: " + sum;</div><div>}</div>
