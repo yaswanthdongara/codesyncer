@@ -1,1 +1,1 @@
-const DEFAULT_AI_KEY = ""; // User must provide their own key via Settings
+// Configuration file

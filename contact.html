@@ -15,6 +15,15 @@
                 document.documentElement.className = savedTheme;
             }
 
+            // Font Size Loader
+            const savedFontSize = localStorage.getItem('fontSize');
+            if (savedFontSize) {
+                document.documentElement.style.fontSize = savedFontSize + 'px';
+                document.addEventListener('DOMContentLoaded', () => {
+                   document.body.style.fontSize = savedFontSize + 'px';
+                });
+            }
+
             // Wallpaper Loader (Prevents Flash)
             const url = localStorage.getItem('wallpaper_url') || '';
             const imageData = localStorage.getItem('wallpaper_image_data') || '';
@@ -66,7 +75,7 @@
                     <a href="contact.html" class="nav-link active">Contact</a>
                 </nav>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; min-width: 40px;">
                 <!-- Controls removed as per request -->
             </div>
         </header>

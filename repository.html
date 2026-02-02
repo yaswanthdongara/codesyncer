@@ -16,6 +16,15 @@
                 document.documentElement.className = savedTheme;
             }
 
+            // Font Size Loader
+            const savedFontSize = localStorage.getItem('fontSize');
+            if (savedFontSize) {
+                document.documentElement.style.fontSize = savedFontSize + 'px';
+                document.addEventListener('DOMContentLoaded', () => {
+                   document.body.style.fontSize = savedFontSize + 'px';
+                });
+            }
+
             // Wallpaper Loader (Prevents Flash)
             const url = localStorage.getItem('wallpaper_url') || '';
             const imageData = localStorage.getItem('wallpaper_image_data') || '';
@@ -67,7 +76,7 @@
                     <a href="contact.html" class="nav-link">Contact</a>
                 </nav>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; min-width: 40px;">
             </div>
         </header>
 
@@ -97,13 +106,7 @@
                             Token is stored locally. <a href="https://github.com/settings/tokens" target="_blank" style="color: var(--primary-color);">Generate a token</a> with 'repo' scope.
                         </p>
                     </div>
-                    <div class="form-group">
-                        <label for="aiKeyInput">OpenRouter API Key (Optional)</label>
-                        <input type="password" id="aiKeyInput" class="text-input" placeholder="sk-or-...">
-                        <p style="font-size: 0.8rem; margin-top: 5px; opacity: 0.7;">
-                            Required for AI code generation. Stored locally. <a href="https://openrouter.ai/keys" target="_blank" style="color: var(--primary-color);">Get API Key</a>
-                        </p>
-                    </div>
+
                     
                     <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
 

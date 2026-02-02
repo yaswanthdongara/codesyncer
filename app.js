@@ -40,27 +40,6 @@ const repoInput = document.getElementById('repoInput');
 const createRepoBtn = document.getElementById('createRepoBtn');
 const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 const searchInput = document.getElementById('searchInput');
-const aiKeyInput = document.getElementById('aiKeyInput');
-
-// AI Elements
-const aiGenerateBtn = document.getElementById('aiGenerateBtn');
-const aiModal = document.getElementById('aiModal');
-const closeAiModalBtn = document.getElementById('closeAiModalBtn');
-const aiPromptInput = document.getElementById('aiPromptInput');
-const aiSubmitBtn = document.getElementById('aiSubmitBtn');
-const aiResultContainer = document.getElementById('aiResultContainer');
-const aiCodePreview = document.getElementById('aiCodePreview');
-const aiAcceptBtn = document.getElementById('aiAcceptBtn');
-const aiRejectBtn = document.getElementById('aiRejectBtn');
-const aiLoading = document.getElementById('aiLoading');
-
-// Chat Elements
-const chatHistory = document.getElementById('chatHistory');
-const chatInput = document.getElementById('chatInput');
-const chatSendBtn = document.getElementById('chatSendBtn');
-const chatClearBtn = document.getElementById('chatClearBtn');
-const chatExportPdfBtn = document.getElementById('chatExportPdfBtn');
-const chatExportTxtBtn = document.getElementById('chatExportTxtBtn');
 
 // File View Modal Elements
 const fileViewModal = document.getElementById('fileViewModal');
@@ -157,19 +136,6 @@ function setupEventListeners() {
     if (loadBtn) loadBtn.addEventListener('click', fetchFromGitHub);
     if (themeSelect) themeSelect.addEventListener('change', changeTheme);
     
-    // Algorithm Selection for Home Page - now handled by custom select in index.html logic or setupCustomSelect
-    /*
-    if (algorithmSelect) {
-        algorithmSelect.addEventListener('change', () => {
-             const algo = algorithmSelect.value;
-             if (algo) {
-                 localStorage.setItem('selected_algorithm', algo);
-                 window.location.assign('compiler.html');
-             }
-        });
-    }
-    */
-    
     // Settings Modal
     if (settingsBtn) settingsBtn.addEventListener('click', openSettings);
     if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettings);
@@ -184,19 +150,6 @@ function setupEventListeners() {
         if (fileViewModal && e.target === fileViewModal) {
             fileViewModal.style.display = 'none';
         }
-        if (aiModal && e.target === aiModal) {
-            aiModal.style.display = 'none';
-        }
-    });
-
-    // AI Modal
-    if (aiGenerateBtn) aiGenerateBtn.addEventListener('click', openAiModal);
-    if (closeAiModalBtn) closeAiModalBtn.addEventListener('click', () => aiModal.style.display = 'none');
-    if (aiSubmitBtn) aiSubmitBtn.addEventListener('click', generateAiCode);
-    if (aiAcceptBtn) aiAcceptBtn.addEventListener('click', acceptAiCode);
-    if (aiRejectBtn) aiRejectBtn.addEventListener('click', () => {
-        aiResultContainer.style.display = 'none';
-        aiPromptInput.value = '';
     });
 
     // File View Modal
@@ -245,29 +198,6 @@ function setupEventListeners() {
 
     // Prevent tab key from leaving textarea
     if (codeTextarea) codeTextarea.addEventListener('keydown', handleTabKey);
-
-    // Chat Page Listeners
-    if (chatSendBtn) chatSendBtn.addEventListener('click', sendChatMessage);
-    if (chatClearBtn) chatClearBtn.addEventListener('click', clearChatHistory);
-    if (chatExportPdfBtn) chatExportPdfBtn.addEventListener('click', exportChatToPDF);
-    // if (chatExportTxtBtn) chatExportTxtBtn.addEventListener('click', exportChatToText); // Removed
-    if (chatInput) {
-        // Auto-resize textarea
-        chatInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendChatMessage();
-            }
-        });
-    }
-    
-    // Load chat history if on chat page
-    if (chatHistory) loadChatHistory();
 
     // Folder & Move Listeners
     if (createFileBtn) createFileBtn.addEventListener('click', createNewFile);
@@ -444,12 +374,6 @@ function openSettings() {
     if (usernameInput) usernameInput.value = CONFIG.owner || '';
     if (repoInput) repoInput.value = CONFIG.repo || '';
     
-    // Always show AI Key input and allow user to set it
-    if (aiKeyInput) {
-        aiKeyInput.value = localStorage.getItem('ai_api_key') || '';
-        aiKeyInput.parentElement.style.display = 'block';
-    }
-    
     settingsModal.style.display = 'block';
 }
 
@@ -461,13 +385,11 @@ function saveSettings() {
     const token = tokenInput.value.trim();
     const username = usernameInput ? usernameInput.value.trim() : '';
     const repo = repoInput ? repoInput.value.trim() : '';
-    const aiKey = aiKeyInput ? aiKeyInput.value.trim() : '';
 
     if (token && username && repo) {
         localStorage.setItem('github_token', token);
         localStorage.setItem('github_username', username);
         localStorage.setItem('github_repo', repo);
-        if (aiKey) localStorage.setItem('ai_api_key', aiKey);
         
         showStatus('Configuration saved successfully', 'success');
         closeSettings();
@@ -479,110 +401,7 @@ function saveSettings() {
     }
 }
 
-// AI Functions
-function openAiModal() {
-    // Check local storage first, then default
-    const key = localStorage.getItem('ai_api_key') || (typeof DEFAULT_AI_KEY !== 'undefined' ? DEFAULT_AI_KEY : '');
-    
-    if (!key) {
-        alert('Please configure your AI API Key in Settings first.');
-        openSettings();
-        return;
-    }
-    aiModal.style.display = 'block';
-    aiPromptInput.focus();
-}
 
-async function generateAiCode() {
-    const prompt = aiPromptInput.value.trim();
-    const key = localStorage.getItem('ai_api_key') || (typeof DEFAULT_AI_KEY !== 'undefined' ? DEFAULT_AI_KEY : '');
-    
-    if (!prompt) return;
-    
-    aiLoading.style.display = 'block';
-    aiResultContainer.style.display = 'none';
-    aiSubmitBtn.disabled = true;
-
-    try {
-        // Use OpenRouter API (Free Models)
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${key}`,
-                'HTTP-Referer': window.location.href, // Required by OpenRouter
-                'X-Title': 'Code Syncer'
-            },
-            body: JSON.stringify({
-                model: "meta-llama/llama-3.3-70b-instruct:free",
-                messages: [
-                    {
-                        role: "system", 
-                        content: "You are an expert coding assistant. Return ONLY the code requested. Do not include markdown backticks (```) or explanations unless asked in comments."
-                    },
-                    {
-                        role: "user", 
-                        content: prompt
-                    }
-                ]
-            })
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error?.message || 'API Error');
-        }
-
-        const data = await response.json();
-        
-        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-            console.error('Invalid AI Response:', data);
-            throw new Error('Received invalid response from AI provider. Please try again.');
-        }
-
-        let code = data.choices[0].message.content;
-        
-        // Clean up markdown if present
-        code = code.replace(/^```\w*\n/, '').replace(/\n```$/, '');
-
-        aiCodePreview.textContent = code;
-        aiResultContainer.style.display = 'flex';
-
-    } catch (error) {
-        console.error(error);
-        alert('AI Generation Failed: ' + error.message);
-    } finally {
-        aiLoading.style.display = 'none';
-        aiSubmitBtn.disabled = false;
-    }
-}
-
-function acceptAiCode() {
-    const code = aiCodePreview.textContent;
-    if (codeTextarea) {
-        // Insert at cursor or append
-        const start = codeTextarea.selectionStart;
-        const end = codeTextarea.selectionEnd;
-        const text = codeTextarea.value;
-        
-        if (start || start === 0) {
-            codeTextarea.value = text.substring(0, start) + code + text.substring(end);
-        } else {
-            codeTextarea.value += code;
-        }
-        
-        // Sync to Rich Text Editor
-        const richCodeInput = document.getElementById('richCodeInput');
-        if (richCodeInput) richCodeInput.innerHTML = codeTextarea.value;
-        
-        // Trigger input event to resize if needed
-        codeTextarea.dispatchEvent(new Event('input'));
-    }
-    aiModal.style.display = 'none';
-    aiPromptInput.value = '';
-    aiResultContainer.style.display = 'none';
-    showStatus('Code inserted!', 'success');
-}
 
 async function createRepository() {
     const token = tokenInput.value.trim();
@@ -1339,13 +1158,6 @@ function filterFiles(searchTerm) {
     });
 }
 
-// Display files list (Deprecated, replaced by renderFileList)
-function displayFiles(files) {
-    // Kept for compatibility if called elsewhere, but redirects to renderFileList
-    allFiles = files;
-    renderFileList();
-}
-
 // Edit File
 async function editFile(url, path, sha) {
     // Check if we are on the editor page
@@ -1807,311 +1619,6 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Chat Functionality
-function loadChatHistory() {
-    const history = JSON.parse(localStorage.getItem('chat_history') || '[]');
-    chatHistory.innerHTML = ''; // Clear current
-    
-    // Add welcome message if empty
-    if (history.length === 0) {
-        chatHistory.innerHTML = `
-            <div class="chat-welcome" style="text-align: center; opacity: 0.7; margin-top: 50px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px;"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" x2="8" y1="16" y2="16"/><line x1="16" x2="16" y1="16" y2="16"/></svg>
-                <p>Start a conversation with the AI...</p>
-            </div>
-        `;
-        return;
-    }
-
-    history.forEach(msg => appendMessageToUI(msg.role, msg.content));
-    scrollToBottom();
-}
-
-function appendMessageToUI(role, content) {
-    // Remove welcome message if it exists
-    const welcome = chatHistory.querySelector('.chat-welcome');
-    if (welcome) welcome.remove();
-
-    // Map 'assistant' to 'ai' for styling
-    const styleRole = role === 'assistant' ? 'ai' : role;
-    
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `chat-message ${styleRole}`;
-    
-    const sender = role === 'user' ? 'You' : 'AI';
-    
-    // 1. Escape HTML (basic)
-    let safeContent = content
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-
-    // 2. Extract code blocks to prevent <br> replacement inside them
-    const codeBlocks = [];
-    safeContent = safeContent.replace(/```(\w*)([\s\S]*?)```/g, (match, lang, code) => {
-        codeBlocks.push({ lang, code });
-        return `___CODE_BLOCK_${codeBlocks.length - 1}___`;
-    });
-
-    // 3. Format the remaining text (newlines to <br>, inline code)
-    let formattedContent = safeContent
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\n/g, '<br>');
-
-    // 4. Restore code blocks with proper HTML structure
-    formattedContent = formattedContent.replace(/___CODE_BLOCK_(\d+)___/g, (match, index) => {
-        const block = codeBlocks[index];
-        const language = block.lang || 'text';
-        return `
-            <div class="code-block-wrapper">
-                <div class="code-block-header">
-                    <span class="code-lang">${language}</span>
-                    <button class="copy-code-btn" onclick="copyCode(this)">Copy</button>
-                </div>
-                <pre><code class="language-${language}">${block.code}</code></pre>
-            </div>
-        `;
-    });
-
-    msgDiv.innerHTML = `
-        <div class="chat-sender">${sender}</div>
-        <div class="chat-bubble">${formattedContent}</div>
-    `;
-    
-    chatHistory.appendChild(msgDiv);
-}
-
-function copyCode(btn) {
-    const wrapper = btn.closest('.code-block-wrapper');
-    const codeBlock = wrapper.querySelector('code');
-    
-    // Create a temporary textarea to copy the text
-    // We use this method to ensure we get the raw text without HTML entities
-    const textarea = document.createElement('textarea');
-    textarea.value = codeBlock.textContent;
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-        document.execCommand('copy');
-        const originalText = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(() => {
-            btn.textContent = originalText;
-        }, 2000);
-    } catch (err) {
-        console.error('Failed to copy:', err);
-        btn.textContent = 'Error';
-    }
-    
-    document.body.removeChild(textarea);
-}
-
-function scrollToBottom() {
-    chatHistory.scrollTop = chatHistory.scrollHeight;
-}
-
-async function sendChatMessage() {
-    const text = chatInput.value.trim();
-    if (!text) return;
-    
-    // Add user message
-    appendMessageToUI('user', text);
-    chatInput.value = '';
-    chatInput.style.height = 'auto'; // Reset height
-    scrollToBottom();
-    
-    // Save to history
-    const history = JSON.parse(localStorage.getItem('chat_history') || '[]');
-    history.push({ role: 'user', content: text });
-    localStorage.setItem('chat_history', JSON.stringify(history));
-
-    await processAIResponse(history);
-}
-
-async function processAIResponse(history) {
-    const key = localStorage.getItem('ai_api_key') || (typeof DEFAULT_AI_KEY !== 'undefined' ? DEFAULT_AI_KEY : '');
-
-    // Show loading indicator
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'chat-message ai loading-msg';
-    loadingDiv.innerHTML = `
-        <div class="chat-sender">AI</div>
-        <div class="chat-bubble">Thinking...</div>
-    `;
-    chatHistory.appendChild(loadingDiv);
-    scrollToBottom();
-
-    try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${key}`,
-                'HTTP-Referer': window.location.href,
-                'X-Title': 'Code Syncer'
-            },
-            body: JSON.stringify({
-                model: "meta-llama/llama-3.3-70b-instruct:free",
-                messages: [
-                    {
-                        role: "system", 
-                        content: "You are a helpful coding assistant. Answer questions and provide code snippets."
-                    },
-                    ...history
-                ]
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('API Error: ' + response.status);
-        }
-
-        const data = await response.json();
-        const aiText = data.choices[0].message.content;
-        
-        // Remove loading
-        loadingDiv.remove();
-        
-        // Add AI message
-        appendMessageToUI('assistant', aiText); // OpenRouter returns 'assistant'
-        scrollToBottom();
-        
-        // Save to history
-        history.push({ role: 'assistant', content: aiText });
-        localStorage.setItem('chat_history', JSON.stringify(history));
-
-    } catch (error) {
-        loadingDiv.remove();
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'chat-message system error-msg';
-        errorDiv.innerHTML = `
-            <div class="chat-sender">System</div>
-            <div class="chat-bubble" style="color: var(--danger-color); border-color: var(--danger-color);">
-                Error: ${error.message}
-                <div style="margin-top: 5px;">
-                    <button class="btn btn-small" onclick="retryLastMessage()" style="background: var(--danger-color); color: white; border: none;">Retry</button>
-                </div>
-            </div>
-        `;
-        chatHistory.appendChild(errorDiv);
-        scrollToBottom();
-    }
-}
-
-async function retryLastMessage() {
-    // Remove error message
-    const errorMsg = document.querySelector('.chat-message.system.error-msg');
-    if (errorMsg) errorMsg.remove();
-    
-    const history = JSON.parse(localStorage.getItem('chat_history') || '[]');
-    await processAIResponse(history);
-}
-
-function clearChatHistory() {
-    if (confirm('Are you sure you want to clear the chat history?')) {
-        localStorage.removeItem('chat_history');
-        loadChatHistory();
-    }
-}
-
-function exportChatToText() {
-    const history = JSON.parse(localStorage.getItem('chat_history') || '[]');
-    if (history.length === 0) {
-        alert('No chat history to export.');
-        return;
-    }
-
-    let textContent = "Code Syncer - AI Chat History\n";
-    textContent += "================================\n\n";
-
-    history.forEach(msg => {
-        const role = msg.role === 'user' ? 'You' : 'AI';
-        textContent += `[${role}]:\n${msg.content}\n\n--------------------------------\n\n`;
-    });
-
-    const blob = new Blob([textContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `chat-history-${new Date().toISOString().slice(0, 10)}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function exportChatToPDF() {
-    const history = JSON.parse(localStorage.getItem('chat_history') || '[]');
-    if (history.length === 0) {
-        alert('No chat history to export.');
-        return;
-    }
-
-    // Check if html2pdf is loaded
-    if (typeof html2pdf === 'undefined') {
-        alert('PDF export library not loaded. Please check your internet connection.');
-        return;
-    }
-
-    // Create a temporary container for PDF generation
-    const element = document.createElement('div');
-    element.style.padding = '20px';
-    element.style.fontFamily = 'Arial, sans-serif';
-    element.style.color = '#000';
-    element.style.background = '#fff';
-
-    const title = document.createElement('h1');
-    title.textContent = 'Code Syncer - AI Chat History';
-    title.style.borderBottom = '2px solid #333';
-    title.style.paddingBottom = '10px';
-    element.appendChild(title);
-
-    const date = document.createElement('p');
-    date.textContent = `Date: ${new Date().toLocaleDateString()}`;
-    date.style.marginBottom = '20px';
-    date.style.color = '#666';
-    element.appendChild(date);
-
-    history.forEach(msg => {
-        const msgDiv = document.createElement('div');
-        msgDiv.style.marginBottom = '15px';
-        msgDiv.style.padding = '10px';
-        msgDiv.style.borderRadius = '5px';
-        msgDiv.style.backgroundColor = msg.role === 'user' ? '#f0f7ff' : '#f0f0f0';
-        msgDiv.style.borderLeft = msg.role === 'user' ? '4px solid #007bff' : '4px solid #6c757d';
-
-        const role = document.createElement('strong');
-        role.textContent = msg.role === 'user' ? 'You:' : 'AI:';
-        role.style.display = 'block';
-        role.style.marginBottom = '5px';
-        role.style.color = '#333';
-        msgDiv.appendChild(role);
-
-        const content = document.createElement('div');
-        // Simple formatting for code blocks in PDF
-        let formattedContent = msg.content
-            .replace(/```(\w*)([\s\S]*?)```/g, '<pre style="background:#333; color:#fff; padding:10px; border-radius:4px; overflow-x:hidden; white-space:pre-wrap;">$2</pre>')
-            .replace(/\n/g, '<br>');
-        
-        content.innerHTML = formattedContent;
-        content.style.color = '#444';
-        msgDiv.appendChild(content);
-
-        element.appendChild(msgDiv);
-    });
-
-    const opt = {
-        margin: 10,
-        filename: `chat-history-${new Date().toISOString().slice(0, 10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    // Generate PDF
-    html2pdf().set(opt).from(element).save();
-}
 
 // Folder Security Functions
 function changeFolderPassword() {

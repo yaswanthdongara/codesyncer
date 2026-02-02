@@ -16,6 +16,15 @@
                 document.documentElement.className = savedTheme;
             }
 
+            // Font Size Loader
+            const savedFontSize = localStorage.getItem('fontSize');
+            if (savedFontSize) {
+                document.documentElement.style.fontSize = savedFontSize + 'px';
+                document.addEventListener('DOMContentLoaded', () => {
+                   document.body.style.fontSize = savedFontSize + 'px';
+                });
+            }
+
             // Wallpaper Loader (Prevents Flash)
             const url = localStorage.getItem('wallpaper_url') || '';
             const imageData = localStorage.getItem('wallpaper_image_data') || '';
@@ -85,7 +94,7 @@
             border: none;
             padding: 15px;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
+            font-size: inherit;
             resize: none;
             outline: none;
             line-height: 1.5;
@@ -97,7 +106,7 @@
             color: #d4d4d4;
             padding: 15px;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
+            font-size: inherit;
             overflow-y: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
@@ -154,7 +163,7 @@
                     <a href="contact.html" class="nav-link">Contact</a>
                 </nav>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; min-width: 40px;">
                 <!-- Theme selector removed -->
             </div>
         </header>
@@ -184,38 +193,7 @@
             </div>
         </div>
 
-        <!-- AI Debug Modal -->
-        <div id="aiDebugModal" class="modal">
-            <div class="modal-content ai-modal-content" style="width: 90%; max-width: 1000px;">
-                <div class="modal-header">
-                    <h2 style="display: flex; align-items: center; gap: 10px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" x2="8" y1="16" y2="16"/><line x1="16" x2="16" y1="16" y2="16"/></svg>
-                        AI Debugger
-                    </h2>
-                    <span id="closeAiDebugModalBtn" class="close">&times;</span>
-                </div>
-                <div class="modal-body">
-                    <div id="aiDebugLoading" style="display: none; text-align: center; padding: 20px;">
-                        <p>Analyzing error...</p>
-                    </div>
-                    <div id="aiDebugResult" style="display: none; flex-direction: column; gap: 15px;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 400px;">
-                            <div style="display: flex; flex-direction: column; overflow: hidden;">
-                                <h4 style="color: var(--danger-color); margin-bottom: 5px;">Original Code (Mistakes Underlined)</h4>
-                                <div id="aiOriginalCode" class="output-area" style="flex: 1; overflow: auto; white-space: pre; font-family: 'Consolas', 'Monaco', monospace; border: 1px solid var(--danger-color);"></div>
-                            </div>
-                            <div style="display: flex; flex-direction: column; overflow: hidden;">
-                                <h4 style="color: var(--success-color); margin-bottom: 5px;">Fixed Code</h4>
-                                <div id="aiFixedCode" class="output-area" style="flex: 1; overflow: auto; white-space: pre; font-family: 'Consolas', 'Monaco', monospace; border: 1px solid var(--success-color);"></div>
-                            </div>
-                        </div>
-                        <div id="aiExplanation" style="padding: 10px; background: var(--input-bg); border-radius: 4px; border-left: 4px solid var(--primary-color);"></div>
-                        <button id="applyFixBtn" class="btn" style="width: 100%;">Apply Fix</button>
-                    </div>
-                    <div id="aiDebugError" style="display: none; color: var(--danger-color); padding: 10px;"></div>
-                </div>
-            </div>
-        </div>
+
 
         <div class="compiler-container">
             <div class="editor-pane">
@@ -256,10 +234,7 @@ console.log("Hello, World!");
                 <div class="pane-header">
                     <span>Output</span>
                     <div style="display: flex; gap: 5px;">
-                        <button id="aiDebugBtn" class="btn btn-small" style="background-color: var(--primary-color); color: var(--bg-color); display: flex; align-items: center; gap: 5px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                            AI Debug
-                        </button>
+
                         <button id="outputClearBtn" class="btn btn-small">Clear Output</button>
                     </div>
                 </div>
@@ -267,36 +242,7 @@ console.log("Hello, World!");
             </div>
         </div>
 
-        <!-- AI Explanation Section -->
-        <div style="margin-top: 20px;">
-            <button id="initExplainBtn" class="btn" style="width: 100%; padding: 15px; background: var(--card-bg); border: 1px dashed var(--border-color); color: var(--text-color); cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 1.1rem; transition: all 0.3s ease;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                Explain Code with AI
-            </button>
 
-            <div id="explanationContainer" style="display: none; padding: 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius);">
-                <div class="pane-header" style="background: transparent; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; padding-bottom: 10px;">
-                    <span style="font-size: 1.2rem; font-weight: bold;">AI Code Explanation</span>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="clearChatBtn" class="btn btn-small" style="background-color: var(--danger-color); color: white; display: flex; align-items: center; gap: 5px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            Clear
-                        </button>
-                        <button id="explainBtn" class="btn btn-small" style="background-color: var(--primary-color); color: var(--bg-color); display: flex; align-items: center; gap: 5px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                            Restart
-                        </button>
-                    </div>
-                </div>
-                <div id="explanationChat" style="min-height: 150px; max-height: 500px; overflow-y: auto; resize: vertical; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: var(--border-radius); font-family: 'Consolas', 'Monaco', monospace; white-space: pre-wrap; line-height: 1.6; margin-bottom: 10px;">
-                    <div class="chat-placeholder" style="color: #888;">Click "Explain Code" to start.</div>
-                </div>
-                <div class="chat-input-area" style="display: flex; gap: 10px;">
-                    <input type="text" id="followUpInput" placeholder="Ask a follow-up question..." style="flex: 1; padding: 10px; border-radius: var(--border-radius); border: 2px solid var(--success-color); background: var(--input-bg); color: var(--text-color); outline: none;" disabled>
-                    <button id="sendFollowUpBtn" class="btn btn-small" style="background-color: var(--primary-color); color: var(--bg-color);" disabled>Send</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -477,139 +423,7 @@ public class Main {
         const fileDescriptionInput = document.getElementById('fileDescriptionInput');
         const confirmSaveBtn = document.getElementById('confirmSaveBtn');
 
-        // AI Debug Elements
-        const aiDebugBtn = document.getElementById('aiDebugBtn');
-        const aiDebugModal = document.getElementById('aiDebugModal');
-        const closeAiDebugModalBtn = document.getElementById('closeAiDebugModalBtn');
-        const aiDebugLoading = document.getElementById('aiDebugLoading');
-        const aiDebugResult = document.getElementById('aiDebugResult');
-        const aiDebugText = document.getElementById('aiDebugText');
-        const aiDebugError = document.getElementById('aiDebugError');
-        const applyFixBtn = document.getElementById('applyFixBtn');
-        
-        // AI Explanation Elements
-        const initExplainBtn = document.getElementById('initExplainBtn');
-        const explanationContainer = document.getElementById('explanationContainer');
-        const explainBtn = document.getElementById('explainBtn');
-        const clearChatBtn = document.getElementById('clearChatBtn');
-        const explanationChat = document.getElementById('explanationChat');
-        const followUpInput = document.getElementById('followUpInput');
-        const sendFollowUpBtn = document.getElementById('sendFollowUpBtn');
-        
-        let explanationHistory = [];
 
-        // Load chat history from local storage
-        const savedHistory = localStorage.getItem('explanation_history');
-        if (savedHistory) {
-            try {
-                explanationHistory = JSON.parse(savedHistory);
-                if (explanationHistory.length > 0) {
-                    // Show chat container
-                    initExplainBtn.style.display = 'none';
-                    explanationContainer.style.display = 'block';
-                    
-                    // Enable inputs
-                    followUpInput.disabled = false;
-                    sendFollowUpBtn.disabled = false;
-
-                    // Render messages
-                    explanationHistory.forEach(msg => {
-                        if (msg.role === 'user' && msg.content.includes('Language:')) {
-                            // Skip the initial context message, just show "Please explain this code"
-                            // Or better, just skip system messages and render user/assistant
-                        } else if (msg.role !== 'system') {
-                            // For the first user message which is the big context block, we want to show a simple text
-                            if (msg.role === 'user' && msg.content.startsWith('Language:')) {
-                                appendMessage('user', 'Please explain this code.');
-                            } else {
-                                appendMessage(msg.role, msg.content);
-                            }
-                        }
-                    });
-                }
-            } catch (e) {
-                console.error('Failed to load chat history', e);
-            }
-        }
-
-        function saveHistory() {
-            localStorage.setItem('explanation_history', JSON.stringify(explanationHistory));
-        }
-
-        initExplainBtn.addEventListener('click', () => {
-            initExplainBtn.style.display = 'none';
-            explanationContainer.style.display = 'block';
-            explainBtn.click();
-        });
-
-        function appendMessage(role, text) {
-            const div = document.createElement('div');
-            div.style.marginBottom = '15px';
-            div.style.padding = '10px';
-            div.style.borderRadius = '8px';
-            
-            if (role === 'user') {
-                div.style.background = 'rgba(88, 166, 255, 0.1)';
-                div.style.borderLeft = '3px solid var(--primary-color)';
-                div.innerHTML = `<strong>You:</strong><br>${escapeHtml(text)}`;
-            } else {
-                div.style.background = 'rgba(255, 255, 255, 0.05)';
-                div.style.borderLeft = '3px solid var(--success-color)';
-                
-                // Parse code blocks
-                let formattedText = escapeHtml(text);
-                
-                // Replace code blocks with styled divs and "Apply" button
-                // Regex to find ```lang ... ``` blocks. 
-                // Since we escaped HTML, we look for &lt;code&gt; or just the text pattern if escapeHtml didn't handle it yet.
-                // Actually, let's process raw text first, then escape the non-code parts.
-                
-                // Better approach: Split by code blocks
-                const parts = text.split(/```(\w*)\n([\s\S]*?)```/g);
-                
-                let html = `<strong>AI:</strong><br>`;
-                
-                for (let i = 0; i < parts.length; i++) {
-                    if (i % 3 === 0) {
-                        // Normal text
-                        html += escapeHtml(parts[i]).replace(/\n/g, '<br>');
-                    } else if (i % 3 === 1) {
-                        // Language (ignored for now, or used for class)
-                        // parts[i] is the language
-                    } else {
-                        // Code
-                        const code = parts[i];
-                        const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
-                        html += `<div style="margin-top: 10px; background: #111; padding: 10px; border-radius: 4px; position: relative;">
-                            <pre style="margin: 0; overflow-x: auto;"><code>${escapeHtml(code)}</code></pre>
-                            <button onclick="applyCodeToEditor('${codeId}')" style="position: absolute; top: 5px; right: 5px; padding: 4px 8px; background: var(--primary-color); color: var(--bg-color); border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Apply to Editor</button>
-                            <textarea id="${codeId}" style="display: none;">${escapeHtml(code)}</textarea>
-                        </div>`;
-                    }
-                }
-                
-                div.innerHTML = html;
-            }
-            
-            // Remove placeholder if exists
-            const placeholder = explanationChat.querySelector('.chat-placeholder');
-            if (placeholder) placeholder.remove();
-            
-            explanationChat.appendChild(div);
-            explanationChat.scrollTop = explanationChat.scrollHeight;
-        }
-
-        // Global function to apply code
-        window.applyCodeToEditor = function(id) {
-            const textarea = document.getElementById(id);
-            if (textarea) {
-                // Decode the escaped HTML back to normal text for the editor
-                const txt = document.createElement('textarea');
-                txt.innerHTML = textarea.value;
-                codeEditor.value = txt.value;
-                alert('Code applied to editor!');
-            }
-        };
 
         // Theme handling
         if (themeSelect) {
@@ -703,7 +517,7 @@ public class Main {
                     const logs = [];
                     console.log = (...args) => {
                         logs.push(args.map(arg => 
-                            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
                         ).join(' '));
                     };
 
@@ -799,9 +613,6 @@ public class Main {
             } else if (lang === 'html') {
                 ext = '.html';
                 folder = 'html/';
-            } else if (lang === 'algorithm') {
-                ext = '.txt';
-                folder = 'algorithm/';
             }
             
             // Suggest a filename
@@ -916,309 +727,18 @@ ${code}`;
             }
         });
 
-        // AI Debug Functionality
-        let suggestedFix = null;
-        const aiOriginalCode = document.getElementById('aiOriginalCode');
-        const aiFixedCode = document.getElementById('aiFixedCode');
-        const aiExplanation = document.getElementById('aiExplanation');
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        aiDebugBtn.addEventListener('click', async () => {
-            const code = codeEditor.value;
-            const output = outputArea.innerText;
-            const lang = languageSelect.value;
-            const key = localStorage.getItem('ai_api_key');
-
-            if (!key) {
-                alert('Please configure your AI API Key in the Repository Settings first.');
-                return;
-            }
-
-            if (!output || output.trim() === '') {
-                alert('No output to analyze. Run the code first.');
-                return;
-            }
-
-            aiDebugModal.style.display = 'block';
-            aiDebugLoading.style.display = 'block';
-            aiDebugResult.style.display = 'none';
-            aiDebugError.style.display = 'none';
-            suggestedFix = null;
-
-            try {
-                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${key}`,
-                        'HTTP-Referer': window.location.href,
-                        'X-Title': 'Code Syncer'
-                    },
-                    body: JSON.stringify({
-                        model: "meta-llama/llama-3.3-70b-instruct:free",
-                        messages: [
-                            {
-                                role: "system",
-                                content: `You are an expert programmer. Analyze the code and the error output.
-Return ONLY a valid JSON object with this structure:
-{
-    "explanation": "Brief explanation of the error",
-    "fixed_code": "The complete fixed code string with proper formatting and newlines (use \\n for line breaks)",
-    "error_lines": [1, 3]
-}
-IMPORTANT: The "fixed_code" must be properly formatted with actual newline characters (\\n) and proper indentation.
-For Java code, ensure proper indentation with 4 spaces per level.
-"error_lines" should be an array of line numbers (1-based) where the errors are located.
-Do not include markdown formatting or backticks in the JSON.`
-                            },
-                            {
-                                role: "user",
-                                content: `Language: ${lang}\n\nCode:\n${code}\n\nOutput/Error:\n${output}`
-                            }
-                        ]
-                    })
-                });
-
-                if (!response.ok) throw new Error('AI API Error');
-
-                const data = await response.json();
-                let content = data.choices[0].message.content;
-                
-                // Clean up if the model wraps in markdown
-                content = content.replace(/```json/g, '').replace(/```/g, '').trim();
-                
-                let result;
-                try {
-                    result = JSON.parse(content);
-                } catch (e) {
-                    // Fallback if JSON parsing fails
-                    console.error("Failed to parse AI JSON", content);
-                    throw new Error("AI response was not in valid JSON format.");
-                }
-
-                // Render Original Code with Highlights
-                const lines = code.split('\n');
-                const errorLines = new Set(result.error_lines || []);
-                
-                aiOriginalCode.innerHTML = '<pre style="margin: 0; font-family: inherit; background: inherit; padding: 0;">' + 
-                    lines.map((line, index) => {
-                        const lineNum = index + 1;
-                        const content = escapeHtml(line) || '&nbsp;';
-                        if (errorLines.has(lineNum)) {
-                            return `<span style="background: rgba(218, 54, 51, 0.2); text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--danger-color);">${content}</span>`;
-                        }
-                        return content;
-                    }).join('\n') + 
-                    '</pre>';
-                
-                // Render Fixed Code
-                // Handle both actual newlines and escaped \n characters
-                let fixedCode = result.fixed_code;
-                // If the code contains literal \n strings, replace them with actual newlines
-                if (!fixedCode.includes('\n') && fixedCode.includes('\\n')) {
-                    fixedCode = fixedCode.replace(/\\n/g, '\n');
-                }
-                // Also handle \t for tabs
-                if (fixedCode.includes('\\t')) {
-                    fixedCode = fixedCode.replace(/\\t/g, '    ');
-                }
-                
-                const fixedLines = fixedCode.split('\n');
-                aiFixedCode.innerHTML = '<pre style="margin: 0; font-family: inherit; background: inherit; padding: 0;">' + 
-                    fixedLines.map(line => escapeHtml(line) || '&nbsp;').join('\n') + 
-                    '</pre>';
-                
-                // Render Explanation
-                aiExplanation.textContent = result.explanation;
-                
-                suggestedFix = fixedCode;
-                
-                aiDebugLoading.style.display = 'none';
-                aiDebugResult.style.display = 'flex';
-
-            } catch (error) {
-                aiDebugLoading.style.display = 'none';
-                aiDebugError.innerText = 'Error: ' + error.message;
-                aiDebugError.style.display = 'block';
-            }
-        });
-
-        closeAiDebugModalBtn.addEventListener('click', () => {
-            aiDebugModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (e) => {
-            if (e.target === aiDebugModal) {
-                aiDebugModal.style.display = 'none';
-            }
-        });
-
-        applyFixBtn.addEventListener('click', () => {
-            if (suggestedFix) {
-                codeEditor.value = suggestedFix;
-                aiDebugModal.style.display = 'none';
-                alert('Code updated with AI fix!');
-            }
-        });
         
         // Output Clear Button Logic
-        const btns = document.querySelectorAll('button');
-        btns.forEach(b => {
-             if (b.innerText.includes('Clear Output')) {
-                 b.addEventListener('click', () => {
-                     const outputArea = document.getElementById('outputArea');
-                     const inputArea = document.getElementById('inputArea');
-                     if (outputArea) outputArea.innerHTML = '';
-                     if (inputArea) inputArea.value = '';
-                 });
-             }
-        });
+        const outputClearBtn = document.getElementById('outputClearBtn');
+        if (outputClearBtn) {
+            outputClearBtn.addEventListener('click', () => {
+                outputArea.innerHTML = '';
+                inputArea.value = '';
+            });
+        }
 
-        // AI Explanation Functionality
-        clearChatBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear the chat history?')) {
-                explanationHistory = [];
-                localStorage.removeItem('explanation_history');
-                explanationChat.innerHTML = '<div class="chat-placeholder" style="color: #888;">Click "Explain Code" to start.</div>';
-                followUpInput.disabled = true;
-                sendFollowUpBtn.disabled = true;
-                initExplainBtn.style.display = 'flex';
-                explanationContainer.style.display = 'none';
-            }
-        });
 
-        explainBtn.addEventListener('click', async () => {
-            const code = codeEditor.value;
-            const lang = languageSelect.value;
-            const key = localStorage.getItem('ai_api_key');
-
-            if (!key) {
-                alert('Please configure your AI API Key in the Repository Settings first.');
-                return;
-            }
-
-            if (!code || code.trim() === '') {
-                alert('Please enter some code to explain.');
-                return;
-            }
-
-            explainBtn.disabled = true;
-            explainBtn.innerHTML = 'Explaining...';
-            
-            // Reset chat
-            explanationChat.innerHTML = '';
-            explanationHistory = [
-                {
-                    role: "system",
-                    content: "You are an expert programmer. Explain the code clearly and concisely for a beginner. Focus on the logic and flow. Be ready to answer follow-up questions. If you provide code examples, please include comments explaining the logic."
-                },
-                {
-                    role: "user",
-                    content: `Language: ${lang}\n\nCode:\n${code}\n\nPlease explain this code.`
-                }
-            ];
-            saveHistory();
-
-            appendMessage('user', 'Please explain this code.');
-            
-            // Enable input for follow-up
-            followUpInput.disabled = false;
-            sendFollowUpBtn.disabled = false;
-
-            try {
-                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${key}`,
-                        'HTTP-Referer': window.location.href,
-                        'X-Title': 'Code Syncer'
-                    },
-                    body: JSON.stringify({
-                        model: "meta-llama/llama-3.3-70b-instruct:free",
-                        messages: explanationHistory
-                    })
-                });
-
-                if (!response.ok) throw new Error('AI API Error');
-
-                const data = await response.json();
-                const content = data.choices[0].message.content;
-                
-                explanationHistory.push({ role: "assistant", content: content });
-                saveHistory();
-                appendMessage('assistant', content);
-
-            } catch (error) {
-                appendMessage('assistant', 'Error: ' + error.message);
-            } finally {
-                explainBtn.disabled = false;
-                explainBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    Explain Code
-                `;
-            }
-        });
-
-        sendFollowUpBtn.addEventListener('click', async () => {
-            const question = followUpInput.value.trim();
-            const key = localStorage.getItem('ai_api_key');
-            
-            if (!question) return;
-            
-            appendMessage('user', question);
-            followUpInput.value = '';
-            followUpInput.disabled = true;
-            sendFollowUpBtn.disabled = true;
-            sendFollowUpBtn.innerText = '...';
-            
-            explanationHistory.push({ role: "user", content: question });
-            saveHistory();
-
-            try {
-                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${key}`,
-                        'HTTP-Referer': window.location.href,
-                        'X-Title': 'Code Syncer'
-                    },
-                    body: JSON.stringify({
-                        model: "meta-llama/llama-3.3-70b-instruct:free",
-                        messages: explanationHistory
-                    })
-                });
-
-                if (!response.ok) throw new Error('AI API Error');
-
-                const data = await response.json();
-                const content = data.choices[0].message.content;
-                
-                explanationHistory.push({ role: "assistant", content: content });
-                saveHistory();
-                appendMessage('assistant', content);
-
-            } catch (error) {
-                appendMessage('assistant', 'Error: ' + error.message);
-            } finally {
-                followUpInput.disabled = false;
-                sendFollowUpBtn.disabled = false;
-                sendFollowUpBtn.innerText = 'Send';
-                followUpInput.focus();
-            }
-        });
-
-        followUpInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendFollowUpBtn.click();
-            }
-        });
     </script>
 </body>
 </html>
