@@ -3,7 +3,7 @@
 A hacker-themed web application that allows you to save, retrieve, and manage code snippets directly on GitHub.
 
 ##  Live Demo
-**[Open Code Syncer](https://dongarayaswanth.github.io/codesyncer/)**
+**[Open Code Syncer](https://yaswanthdongara.github.io/codesyncer/)**
 
 ##  Features
 
@@ -19,5 +19,7 @@ A hacker-themed web application that allows you to save, retrieve, and manage co
 1. **Fork/Clone** this repository.
 2. Enable **GitHub Pages** in Settings -> Pages (Source: \main\ branch).
 3. Open the live link.
-4. Click the **Key Icon ()** and enter your GitHub Personal Access Token (with \epo\ scope).
+4. Click the **Key Icon ()** and enter your GitHub Personal Access Token (with \
+epo\ scope).
+
 
